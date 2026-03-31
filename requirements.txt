@@ -1,0 +1,8 @@
+streamlit
+pdfplumber
+python-dotenv
+
+# LLM providers — install only what you use
+openai                    # LLM_PROVIDER=openai
+google-generativeai       # LLM_PROVIDER=gemini
+anthropic                 # LLM_PROVIDER=anthropic
