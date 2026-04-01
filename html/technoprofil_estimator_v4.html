@@ -1,0 +1,660 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px}
+.root{padding:1rem 0}
+.top-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center}
+.top-label{font-size:11px;color:var(--color-text-tertiary);letter-spacing:.06em;text-transform:uppercase;margin-right:4px}
+.chip{font-size:12px;padding:4px 11px;border-radius:20px;border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.chip.on{background:var(--color-background-tertiary);color:var(--color-text-primary);border-color:var(--color-border-primary)}
+.cols{display:grid;grid-template-columns:220px 1fr;gap:1.25rem;align-items:start}
+@media(max-width:600px){.cols{grid-template-columns:1fr}}
+.card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem 1rem}
+.card+.card{margin-top:.75rem}
+.sec{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-tertiary);font-weight:500;margin-bottom:.65rem}
+.field{margin-bottom:.6rem}
+.field label{display:block;font-size:11px;color:var(--color-text-secondary);margin-bottom:3px}
+.field input,.field select{width:100%;font-size:12px}
+.hint{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.shape-pick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:.65rem}
+.sh-btn{border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:6px 4px;cursor:pointer;text-align:center;background:var(--color-background-secondary);transition:all .15s}
+.sh-btn:hover{border-color:var(--color-border-primary)}
+.sh-btn.on{border-color:var(--color-border-info);background:var(--color-background-info)}
+.sh-btn svg{display:block;margin:0 auto 3px}
+.sh-btn span{font-size:10px;color:var(--color-text-secondary);line-height:1.3;display:block}
+.sh-btn.on span{color:var(--color-text-info)}
+.tog-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem;font-size:11px;color:var(--color-text-secondary)}
+.tog-track{position:relative;width:28px;height:16px;background:var(--color-border-secondary);border-radius:8px;display:inline-block;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tog-track:has(input:checked){background:var(--color-text-info)}
+.tog-thumb{position:absolute;top:2px;left:2px;width:12px;height:12px;background:#fff;border-radius:50%;transition:transform .2s;pointer-events:none}
+.tog-input{position:absolute;opacity:0;width:100%;height:100%;cursor:pointer;margin:0}
+.tog-input:checked~.tog-thumb{transform:translateX(12px)}
+.steps-col{display:flex;flex-direction:column;gap:.75rem}
+.step-card{border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.step-head{display:flex;align-items:center;gap:10px;padding:.7rem 1rem;background:var(--color-background-secondary);border-bottom:.5px solid var(--color-border-tertiary);cursor:pointer;user-select:none}
+.step-idx{font-size:10px;width:18px;height:18px;border-radius:50%;border:.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);flex-shrink:0}
+.step-name{flex:1;font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.step-result{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.step-badge{font-size:9px;padding:2px 6px;border-radius:10px;background:var(--color-background-warning);color:var(--color-text-warning);margin-left:4px;font-weight:400}
+.step-body{display:none;padding:.9rem 1rem}
+.step-card.open .step-body{display:block}
+.step-inner{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+@media(max-width:520px){.step-inner{grid-template-columns:1fr}}
+.formula-box{font-family:var(--font-mono);font-size:10px;background:var(--color-background-tertiary);border-radius:var(--border-radius-md);padding:7px 9px;color:var(--color-text-secondary);line-height:1.8;word-break:break-all;margin-bottom:.6rem}
+.insight-box{font-size:11px;color:var(--color-text-secondary);line-height:1.6;border-left:2px solid var(--color-border-secondary);padding-left:7px;margin-bottom:.6rem}
+.kv{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:.5px solid var(--color-border-tertiary)}
+.kv:last-child{border:none;font-weight:500}
+.kv span:first-child{color:var(--color-text-secondary)}
+.kv.warn span:last-child{color:var(--color-text-warning)}
+.mext-toggle{display:flex;gap:0;margin-bottom:.6rem;border:.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden}
+.mext-opt{flex:1;font-size:10px;padding:5px 4px;text-align:center;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);border:none;transition:all .15s;line-height:1.3}
+.mext-opt.on{background:var(--color-background-warning);color:var(--color-text-warning)}
+.totals{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:.75rem}
+@media(max-width:500px){.totals{grid-template-columns:1fr 1fr}}
+.tot{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.65rem .9rem}
+.tot .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin-bottom:3px}
+.tot .val{font-size:17px;font-weight:500;color:var(--color-text-primary)}
+.tot .sub{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}
+</style>
+
+<div class="root">
+<div class="top-bar">
+  <span class="top-label">Preset</span>
+  <button class="chip on" onclick="preset('ex3',this)">Ex.3 — Crystal Gold sill</button>
+  <button class="chip" onclick="preset('ex4',this)">Ex.4 — Spoerry nose</button>
+  <button class="chip" onclick="preset('ex2',this)">Ex.2 — ANCM coping</button>
+  <button class="chip" onclick="preset('ex1',this)">Ex.1 — Conway arch</button>
+</div>
+
+<div class="cols">
+<div>
+  <div class="card">
+    <div class="sec">Shape</div>
+    <div class="shape-pick">
+      <div class="sh-btn" onclick="setShape('rect',this)">
+        <svg width="44" height="28" viewBox="0 0 44 28"><rect x="4" y="4" width="36" height="20" rx="1" fill="none" stroke="var(--color-border-primary)" stroke-width="1.2"/></svg>
+        <span>Rectangular slab</span>
+      </div>
+      <div class="sh-btn on" onclick="setShape('chamfer',this)">
+        <svg width="44" height="28" viewBox="0 0 44 28"><path d="M12 4 L40 4 L40 24 L4 24 L4 12 Z" fill="none" stroke="var(--color-border-primary)" stroke-width="1.2"/></svg>
+        <span>Angled step / sill</span>
+      </div>
+      <div class="sh-btn" onclick="setShape('coping',this)">
+        <svg width="44" height="28" viewBox="0 0 44 28"><path d="M4 8 Q22 2 40 8 L40 22 Q22 26 4 22 Z" fill="none" stroke="var(--color-border-primary)" stroke-width="1.2"/></svg>
+        <span>Curved coping</span>
+      </div>
+      <div class="sh-btn" onclick="setShape('profile',this)">
+        <svg width="44" height="28" viewBox="0 0 44 28"><path d="M4 24 L4 12 L14 4 L40 4 L40 24 Z" fill="none" stroke="var(--color-border-primary)" stroke-width="1.2"/></svg>
+        <span>Shaped profile</span>
+      </div>
+    </div>
+
+    <div class="sec">Material</div>
+    <div class="field">
+      <label>Stone family</label>
+      <select id="famille" onchange="calc()"><option value="granit">Granit</option><option value="calcaire">Calcaire</option></select>
+    </div>
+    <div class="field">
+      <label>Surface finish</label>
+      <select id="fini" onchange="calc()">
+        <option value="brule_cg">Brûlé — Crystal Gold (2.50)</option>
+        <option value="brule">Brûlé — other granite (3.50)</option>
+        <option value="jet_sable">Jet de sable (3.50)</option>
+        <option value="meule">Meulé (3.00)</option>
+        <option value="poli_glace">Poli glacé (5.00)</option>
+        <option value="bouchard_gros">Bouchardé gros (5.50)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Price / pi³ (P)</label>
+      <input type="number" id="P" value="53" step="0.5" oninput="calc()">
+      <div class="hint">$/pi³ — from supplier</div>
+    </div>
+
+    <div class="sec" style="margin-top:.4rem">Dimensions</div>
+    <div class="r2">
+      <div class="field"><label>B — thickness (in)</label><input type="number" id="B" value="2" step="0.125" oninput="calc()"></div>
+      <div class="field"><label>A — depth (in)</label><input type="number" id="A" value="18.875" step="0.0625" oninput="calc()"></div>
+    </div>
+    <div class="field"><label>C — length (in)</label><input type="number" id="C" value="27.5625" step="0.0625" oninput="calc()"></div>
+
+    <div class="sec" style="margin-top:.4rem">Machining</div>
+    <div class="tog-row">
+      <span>Angle cut (45° chamfer)</span>
+      <label class="tog-track"><input class="tog-input" type="checkbox" id="hasAngle" checked onchange="calc()"><span class="tog-thumb"></span></label>
+    </div>
+    <div id="mext-pick" class="mext-toggle">
+      <button class="mext-opt" onclick="setMext('official',this)">Official table<br>m_ext=1.0</button>
+      <button class="mext-opt on" onclick="setMext('observed',this)">Observed ×1.25²<br>matches Ex.3</button>
+    </div>
+    <div class="tog-row" style="margin-top:.4rem">
+      <span>Brûlage service</span>
+      <label class="tog-track"><input class="tog-input" type="checkbox" id="hasBrulage" onchange="toggleBrulage(this)"><span class="tog-thumb"></span></label>
+    </div>
+    <div id="brulage-fields" style="display:none">
+      <div class="field">
+        <label>Rate ($/pi.lin)</label>
+        <input type="number" id="brulRate" value="3.00" step="0.25" oninput="calc()">
+        <div class="hint">3.00 (Ex.4 Crystal Gold) · 5.00 (Ex.1 Woodbury) ⚠️</div>
+      </div>
+      <div class="hint" style="margin-bottom:.5rem">κ=1.4 path factor applied automatically</div>
+    </div>
+
+    <div class="sec" style="margin-top:.4rem">Pricing</div>
+    <div class="field">
+      <label>Client type</label>
+      <select id="client" onchange="calc()">
+        <option value="0.85">Particulier — ÷0.85 (observed)</option>
+        <option value="0.684">Particulier — ÷0.684 (official)</option>
+        <option value="0.855">Distributeur — ÷0.855</option>
+        <option value="0.90">Contracteur >10k — ÷0.90</option>
+        <option value="0.70">Contracteur <3k — ÷0.70</option>
+      </select>
+    </div>
+    <div class="field"><label>Quantity</label><input type="number" id="QTY" value="4" min="1" step="1" oninput="calc()"></div>
+  </div>
+</div>
+
+<div class="steps-col" id="steps-col"></div>
+</div>
+
+<div class="totals">
+  <div class="tot"><div class="lbl">Cost brut</div><div class="val" id="t-brut">—</div><div class="sub">before machining</div></div>
+  <div class="tot"><div class="lbl">Machining</div><div class="val" id="t-mach">—</div><div class="sub">angle + brûlage</div></div>
+  <div class="tot"><div class="lbl">Unit price</div><div class="val" id="t-unit">—</div><div class="sub">after ÷γ</div></div>
+  <div class="tot"><div class="lbl">Total order</div><div class="val" id="t-total">—</div><div class="sub" id="t-qty">—</div></div>
+</div>
+</div>
+
+<script>
+var SHAPE = 'chamfer';
+var MEXT_MODE = 'observed';
+
+var PRESETS = {
+  ex3:{B:2,A:18.875,C:27.5625,P:53,famille:'granit',fini:'brule_cg',client:'0.85',QTY:4,shape:'chamfer',hasAngle:true,hasBrulage:false,brulRate:3.00,mext:'observed'},
+  ex4:{B:2.008,A:11.89,C:39.33,P:44,famille:'granit',fini:'brule_cg',client:'0.85',QTY:1,shape:'coping',hasAngle:false,hasBrulage:true,brulRate:3.00,mext:'observed'},
+  ex2:{B:12,A:22.99,C:86.17,P:24.5,famille:'granit',fini:'brule',client:'0.855',QTY:1,shape:'coping',hasAngle:true,hasBrulage:true,brulRate:5.00,mext:'official'},
+  ex1:{B:6,A:23.25,C:95.19,P:69.75,famille:'granit',fini:'brule',client:'0.85',QTY:5,shape:'profile',hasAngle:true,hasBrulage:true,brulRate:5.00,mext:'official'}
+};
+
+var F_TBL = {
+  granit:{brule:3.50,brule_cg:2.50,jet_sable:3.50,meule:3.00,poli_glace:5.00,bouchard_gros:5.50},
+  calcaire:{brule:0,brule_cg:0,jet_sable:2.50,meule:0.75,poli_glace:5.00,bouchard_gros:3.50}
+};
+var PS_TBL = {
+  granit:[[2,3.50],[3,3.75],[4.5,4.00],[5.5,4.50],[6.5,5.50],[8,6.00],[10,7.00],[12,7.50],[14,8.00],[16,8.50],[20,9.50],[24,10.50],[28,12.50],[32,14.50],[34,16.50],[36,17.50],[38,18.50],[40,19.50]],
+  calcaire:[[2,2.50],[3,3.00],[4.5,3.50],[5.5,4.00],[6.5,5.00],[8,5.00],[10,6.50],[12,7.00],[14,7.50],[16,8.00],[20,8.50],[24,10.00],[28,12.50],[32,14.00],[34,16.00],[36,17.00],[38,18.00],[40,19.00]]
+};
+var PASS_TBL = [[1,4.50],[2,5.20],[3,5.70],[4,6.60],[5,7.50],[10,11.20],[15,15.00],[20,18.70],[25,22.40],[30,26.20],[35,30.00],[40,33.75],[45,37.50]];
+
+function lookupPS(f,B){
+  var t=PS_TBL[f];
+  for(var i=0;i<t.length;i++) if(B<=t[i][0]) return t[i][1];
+  return t[t.length-1][1];
+}
+function lookupPass(np){
+  var t=PASS_TBL;
+  if(np<=t[0][0]) return t[0][1];
+  for(var i=1;i<t.length;i++){
+    if(np<=t[i][0]){
+      var n0=t[i-1][0],c0=t[i-1][1],n1=t[i][0],c1=t[i][1];
+      return c0+(np-n0)/(n1-n0)*(c1-c0);
+    }
+  }
+  return t[t.length-1][1];
+}
+function debitage(f,B){
+  if(B<=1.75) return {flat:true,rate:3.50,label:'flat rate (B\u22641\u00be")'};
+  if(B<=3.5)  return {flat:true,rate:4.50,label:'flat rate (2"\u20133\u00bd")'};
+  var inc=f==='granit'?1.25:1.0;
+  var raw=B/inc, p=Math.ceil(raw), rate=lookupPass(p);
+  return {flat:false,inc:inc,raw:raw,p:p,rate:rate};
+}
+function mExt(B){
+  if(B<=3.5) return 1.0; if(B<=6) return 1.5; if(B<=8) return 2.0;
+  if(B<=10) return 2.5; return 3.0;
+}
+function nd(v,d){ return parseFloat(v.toFixed(d===undefined?2:d)).toString(); }
+function $d(v){ return '$'+v.toFixed(2); }
+
+function setShape(s,el){
+  SHAPE=s;
+  document.querySelectorAll('.sh-btn').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  calc();
+}
+function setMext(m,el){
+  MEXT_MODE=m;
+  document.querySelectorAll('.mext-opt').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  calc();
+}
+function toggleBrulage(cb){
+  document.getElementById('brulage-fields').style.display=cb.checked?'block':'none';
+  calc();
+}
+
+function preset(k,el){
+  var p=PRESETS[k];
+  document.getElementById('B').value=p.B;
+  document.getElementById('A').value=p.A;
+  document.getElementById('C').value=p.C;
+  document.getElementById('P').value=p.P;
+  document.getElementById('famille').value=p.famille;
+  document.getElementById('fini').value=p.fini;
+  document.getElementById('client').value=p.client;
+  document.getElementById('QTY').value=p.QTY;
+  document.getElementById('hasAngle').checked=p.hasAngle;
+  document.getElementById('hasBrulage').checked=p.hasBrulage;
+  document.getElementById('brulRate').value=p.brulRate;
+  document.getElementById('brulage-fields').style.display=p.hasBrulage?'block':'none';
+  SHAPE=p.shape; MEXT_MODE=p.mext;
+  var shMap={rect:'Rectangular slab',chamfer:'Angled step / sill',coping:'Curved coping',profile:'Shaped profile'};
+  document.querySelectorAll('.sh-btn').forEach(function(b){
+    b.classList.toggle('on', b.querySelector('span').textContent===shMap[p.shape]);
+  });
+  document.querySelectorAll('.mext-opt').forEach(function(b){
+    b.classList.toggle('on', (p.mext==='official'&&b.textContent.indexOf('Official')>=0)||(p.mext==='observed'&&b.textContent.indexOf('Observed')>=0));
+  });
+  document.querySelectorAll('.chip').forEach(function(b){b.classList.remove('on');});
+  el.classList.add('on');
+  calc();
+}
+
+function svgW(content, h){
+  if(!h) h=130;
+  return '<svg width="100%" viewBox="0 0 260 '+h+'" xmlns="http://www.w3.org/2000/svg" style="display:block;margin-top:4px">'
+    +'<defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">'
+    +'<path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
+    +'</marker></defs>'
+    +content+'</svg>';
+}
+
+function tx(x,y,s,anchor,col,fs,extra){
+  if(!anchor) anchor='middle';
+  if(!col) col='var(--color-text-secondary)';
+  if(!fs) fs=9.5;
+  if(!extra) extra='';
+  return '<text x="'+x+'" y="'+y+'" text-anchor="'+anchor+'" font-size="'+fs+'" fill="'+col+'" font-family="var(--font-sans)" '+extra+'>'+s+'</text>';
+}
+
+var C_DIM='#3B8BD4', C_WARN='#E8593C', C_OK='#1D9E75';
+
+function makeStep(idx,name,result,badge,formulaLines,insight,kvs,diagFn,startOpen){
+  var div=document.createElement('div');
+  div.className='step-card'+(startOpen?' open':'');
+  var badgeHtml=badge?('<span class="step-badge">'+badge+'</span>'):'';
+  var kvHtml=kvs.map(function(row){
+    var k=row[0],v=row[1],warn=row[2];
+    return '<div class="kv'+(warn?' warn':'')+'"><span>'+k+'</span><span>'+v+'</span></div>';
+  }).join('');
+  div.innerHTML=
+    '<div class="step-head" onclick="this.closest(\'.step-card\').classList.toggle(\'open\')">'
+      +'<div class="step-idx">'+idx+'</div>'
+      +'<div class="step-name">'+name+badgeHtml+'</div>'
+      +'<div class="step-result">'+result+'</div>'
+    +'</div>'
+    +'<div class="step-body">'
+      +'<div class="step-inner">'
+        +'<div>'
+          +'<div class="formula-box">'+formulaLines+'</div>'
+          +'<div class="insight-box">'+insight+'</div>'
+          +kvHtml
+        +'</div>'
+        +'<div id="diag-'+idx+'"></div>'
+      +'</div>'
+    +'</div>';
+  return {el:div, diagId:'diag-'+idx, diagFn:diagFn};
+}
+
+function calc(){
+  var B=parseFloat(document.getElementById('B').value)||0;
+  var A=parseFloat(document.getElementById('A').value)||0;
+  var C=parseFloat(document.getElementById('C').value)||0;
+  var P=parseFloat(document.getElementById('P').value)||0;
+  var famille=document.getElementById('famille').value;
+  var fini=document.getElementById('fini').value;
+  var gamma=parseFloat(document.getElementById('client').value)||0.85;
+  var QTY=parseInt(document.getElementById('QTY').value)||1;
+  var hasAngle=document.getElementById('hasAngle').checked;
+  var hasBrulage=document.getElementById('hasBrulage').checked;
+  var brulRate=parseFloat(document.getElementById('brulRate').value)||3.00;
+
+  var delta=0.25, dB=0.5, alpha=0.85, b1=0.95, b2=0.90, kappa=1.4;
+  var eta=Math.pow((12+delta)/12, 2);
+  var F=(F_TBL[famille]&&F_TBL[famille][fini])||0;
+  var MP=P*(B+dB)/12*eta;
+  var deb=debitage(famille,B);
+  var GS=deb.rate;
+  var PS=lookupPS(famille,B);
+  var rawBase=MP+GS+PS+F;
+  var Base=rawBase/alpha;
+
+  var A_b=A+delta, C_b=C+1.0;
+  var S=(A_b/12)*(C_b/12);
+  var Cost_brut=S*Base;
+
+  var m_table=mExt(B);
+  var m_obs=(B<=3.5)?1.25*1.25:m_table;
+  var m_used=MEXT_MODE==='observed'?m_obs:m_table;
+  var S_angle=A_b/Math.sin(Math.PI/4)/12;
+  var P_angle=F*m_used;
+  var Cost_angle=hasAngle?S_angle*P_angle/(b1*b2):0;
+
+  var L_brul=C*kappa/12;
+  var Cost_brul=hasBrulage?L_brul*brulRate/(b1*b2):0;
+
+  var Cost_mach=Cost_angle+Cost_brul;
+  var ST=Cost_brut+Cost_mach;
+  var unit=ST/gamma;
+  var total=unit*QTY;
+
+  document.getElementById('t-brut').textContent=$d(Cost_brut);
+  document.getElementById('t-mach').textContent=$d(Cost_mach);
+  document.getElementById('t-unit').textContent=$d(unit);
+  document.getElementById('t-total').textContent=$d(total);
+  document.getElementById('t-qty').textContent=QTY+' \u00d7 '+$d(unit);
+  document.getElementById('mext-pick').style.opacity=hasAngle?'1':'0.4';
+  document.getElementById('mext-pick').style.pointerEvents=hasAngle?'':'none';
+
+  var steps=[];
+  var idx=1;
+
+  // 1 — MP
+  steps.push(makeStep(idx++,'MP \u2014 material cost per pi\u00b2',$d(MP)+'/pi\u00b2','',
+    'MP = P \u00d7 (B + \u0394B) / 12 \u00d7 \u03b7\n'
+    +'   = '+nd(P)+' \u00d7 ('+nd(B)+' + 0.5) / 12 \u00d7 '+nd(eta,4)+'\n'
+    +'   = '+$d(MP)+'/pi\u00b2',
+    'You buy stone at '+$d(P)+'/pi\u00b3. Each pi\u00b2 of face requires <b>'+nd((B+dB)/12,4)+' pi</b> of depth (B plus \u0394B=\u00bd" calibration). \u03b7='+nd(eta,4)+' adds '+nd((eta-1)*100,1)+'% for blade kerf lost in both planar directions.',
+    [['P',$d(P)+'/pi\u00b3'],['B + \u0394B',nd(B+dB,2)+'" = '+nd((B+dB)/12,4)+' pi'],['\u03b7 (kerf area factor)',nd(eta,4)],['\u2192 MP',$d(MP)+'/pi\u00b2']],
+    function(){
+      var bx=30,by=28,bw=130,bh=55,dw=Math.min(bw*0.13,16);
+      return svgW(
+        tx(115,14,'Stone block cross-section (side view)')
+        +'<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="var(--color-background-secondary)" stroke="var(--color-border-primary)" stroke-width="1"/>'
+        +'<rect x="'+bx+'" y="'+by+'" width="'+dw+'" height="'+bh+'" fill="var(--color-background-tertiary)" stroke="none" opacity=".7"/>'
+        +'<line x1="'+(bx+dw)+'" y1="'+(by-4)+'" x2="'+(bx+dw)+'" y2="'+(by+bh+4)+'" stroke="'+C_WARN+'" stroke-width=".8" stroke-dasharray="3 2"/>'
+        +'<line x1="'+bx+'" y1="'+(by+bh+14)+'" x2="'+(bx+dw)+'" y2="'+(by+bh+14)+'" stroke="'+C_WARN+'" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>'
+        +'<line x1="'+(bx+dw)+'" y1="'+(by+bh+14)+'" x2="'+(bx+bw)+'" y2="'+(by+bh+14)+'" stroke="'+C_DIM+'" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>'
+        +tx(bx+dw/2, by+bh+24, '\u03b4=\u00bc"', 'middle', C_WARN)
+        +tx(bx+dw+(bw-dw)/2, by+bh+24, 'B+\u0394B='+nd(B+dB,2)+'"', 'middle', C_DIM)
+        +'<line x1="'+(bx+bw+12)+'" y1="'+by+'" x2="'+(bx+bw+12)+'" y2="'+(by+bh)+'" stroke="var(--color-border-secondary)" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>'
+        +tx(bx+bw+18, by+bh/2-5, '1 pi\u00b2', 'start', 'var(--color-text-tertiary)', 9)
+        +tx(bx+bw+18, by+bh/2+7, 'face', 'start', 'var(--color-text-tertiary)', 9)
+        +tx(196, by+bh/2, 'P='+$d(P)+'/pi\u00b3', 'start', 'var(--color-text-secondary)', 9)
+        +tx(196, by+bh/2+13, '\u2192 '+$d(MP)+'/pi\u00b2', 'start', C_OK, 9)
+      , 110);
+    }, true));
+
+  // 2 — GS
+  steps.push(makeStep(idx++,'GS \u2014 d\u00e9bitage (trimming to plan)',$d(GS)+'/pi\u00b2','',
+    deb.flat
+      ?'B='+nd(B)+'" \u2192 flat rate bracket\nGS = '+$d(GS)+'/pi\u00b2'
+      :'inc = '+nd(deb.inc,2)+'"/pass ('+famille+' d\u00e9bitage)\npasses = '+nd(B)+'" \u00f7 '+nd(deb.inc,2)+' = '+nd(deb.raw,2)+'\n\u2192 round up to '+deb.p+' passes\nGS = lookup('+deb.p+') = '+$d(GS)+'/pi\u00b2',
+    deb.flat
+      ?'B='+nd(B)+'" is in the flat-rate bracket. No pass count needed.'
+      :'The blade removes <b>'+nd(deb.inc,2)+'"/pass</b> of '+famille+'. B='+nd(B)+'" takes '+nd(deb.raw,2)+' passes, rounded up to <b>'+deb.p+'</b>.',
+    deb.flat
+      ?[['Bracket','B \u2264 3\u00bd"'],['\u2192 GS',$d(GS)+'/pi\u00b2']]
+      :[['Inches/pass',nd(deb.inc,2)+'"'],['Raw passes',nd(deb.raw,2)],['Rounded up',deb.p+' passes'],['\u2192 GS',$d(GS)+'/pi\u00b2']],
+    function(){
+      var passes=deb.flat?1:Math.min(deb.p,12);
+      var sw=160,sh=55,sx=30,sy=32,ph=sh/(passes+1);
+      var lines='';
+      for(var i=1;i<=passes;i++){
+        var py=sy+i*ph, last=(i===passes);
+        lines+='<line x1="'+sx+'" y1="'+py+'" x2="'+(sx+sw)+'" y2="'+py+'" stroke="'+(last?C_WARN:'var(--color-border-secondary)')+'" stroke-width="'+(last?1.2:.5)+'" stroke-dasharray="'+(last?'none':'5 3')+'"/>';
+      }
+      var labelY=sy+passes*ph;
+      return svgW(
+        tx(115,16,'Blade passes through B')
+        +'<rect x="'+sx+'" y="'+sy+'" width="'+sw+'" height="'+sh+'" fill="var(--color-background-secondary)" stroke="var(--color-border-primary)" stroke-width="1"/>'
+        +lines
+        +'<line x1="'+(sx-14)+'" y1="'+sy+'" x2="'+(sx-14)+'" y2="'+(sy+sh)+'" stroke="'+C_DIM+'" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>'
+        +tx(sx-18, sy+sh/2, 'B='+nd(B)+'"', 'middle', C_DIM, 9, 'transform="rotate(-90,'+(sx-18)+','+(sy+sh/2)+')"')
+        +tx(sx+sw+4, labelY, 'pass '+passes, 'start', C_WARN, 9)
+        +tx(115, sy+sh+16, deb.flat?'flat rate':''+deb.p+' passes \u2192 '+$d(GS)+'/pi\u00b2')
+      , sy+sh+28);
+    }));
+
+  // 3 — PS
+  steps.push(makeStep(idx++,'PS \u2014 sciage primaire (block \u2192 slab)',$d(PS)+'/pi\u00b2','',
+    'PS = table_lookup('+famille+', B='+nd(B)+'")\n   = '+$d(PS)+'/pi\u00b2',
+    'Primary cut: slicing the quarry block into slabs. Read from the bracket table. Granit costs more than calcaire; thicker pieces need more saw time.',
+    [['Material',famille],['B',nd(B)+'"'],['\u2192 PS',$d(PS)+'/pi\u00b2']],
+    function(){
+      var tbl=PS_TBL[famille];
+      var rows='',ry=30,show=Math.min(tbl.length,9);
+      for(var i=0;i<show;i++){
+        var lo=(i===0)?1:tbl[i-1][0];
+        var matched=(B<=tbl[i][0])&&(i===0||B>tbl[i-1][0]);
+        var bg=matched?'var(--color-background-info)':'none';
+        var fc=matched?'var(--color-text-info)':'var(--color-text-secondary)';
+        rows+='<rect x="20" y="'+(ry-11)+'" width="220" height="15" fill="'+bg+'" rx="2"/>';
+        rows+=tx(24, ry, lo+'"\u2013'+tbl[i][0]+'"', 'start', fc);
+        rows+=tx(238, ry, '$'+tbl[i][1].toFixed(2), 'end', fc);
+        ry+=17;
+      }
+      return svgW(
+        tx(130,14,'PS table ('+famille+')')
+        +tx(24,26,'Bracket','start','var(--color-text-tertiary)',8.5)
+        +tx(238,26,'$/pi\u00b2','end','var(--color-text-tertiary)',8.5)
+        +'<line x1="20" y1="28" x2="240" y2="28" stroke="var(--color-border-tertiary)" stroke-width=".5"/>'
+        +rows
+      , ry+8);
+    }));
+
+  // 4 — F
+  steps.push(makeStep(idx++,'F \u2014 traitement de surface',$d(F)+'/pi\u00b2','',
+    'F = table_lookup('+famille+', "'+fini+'")\n  = '+$d(F)+'/pi\u00b2',
+    'Applied to every pi\u00b2 of visible face. Harder processes cost more. Br\u00fcl\u00e9 on granit: 3.50 official, 2.50 observed for Crystal Gold.',
+    [['Material',famille],['Finish',fini],['\u2192 F',$d(F)+'/pi\u00b2']],
+    function(){
+      var fin=[['Meul\u00e9',3.00],['Jet de sable',3.50],['Br\u00fcl\u00e9',3.50],['Poli mat',4.50],['Poli glac\u00e9',5.00],['Bouchardé gros',5.50],['Éclat\u00e9',18.00]];
+      var maxV=18,barW=120,bars='',by=28;
+      fin.forEach(function(row){
+        var nm=row[0],v=row[1];
+        var w=v/maxV*barW, cur=Math.abs(v-F)<0.01;
+        var col=cur?C_DIM:'var(--color-background-tertiary)';
+        var fc=cur?C_DIM:'var(--color-text-secondary)';
+        bars+='<rect x="92" y="'+(by-10)+'" width="'+w+'" height="13" fill="'+col+'" opacity="'+(cur?.8:.5)+'" rx="2"/>';
+        bars+=tx(88, by, nm, 'end', fc);
+        bars+=tx(92+w+4, by, '$'+v.toFixed(2), 'start', fc);
+        by+=17;
+      });
+      return svgW(bars, by+6);
+    }));
+
+  // 5 — BASE
+  steps.push(makeStep(idx++,'Base \u2014 assembled rate per pi\u00b2',$d(Base)+'/pi\u00b2','',
+    'Base = (MP + GS + PS + F) / \u03b1\n     = ('+nd(MP,2)+' + '+nd(GS,2)+' + '+nd(PS,2)+' + '+nd(F,2)+') / '+alpha+'\n     = '+nd(rawBase,2)+' / '+alpha+' = '+$d(Base)+'/pi\u00b2',
+    'Sum the four costs then divide by \u03b1=0.85. Dividing by 0.85 = \u00d7'+nd(1/alpha,3)+', adding <b>'+nd((1/alpha-1)*100,1)+'% overhead</b>. This embeds the first two cascade steps (\u00f70.95 \u00d7 \u00f70.90 \u2248 \u00f70.855).',
+    [['MP+GS+PS+F',nd(rawBase,2)+'/pi\u00b2'],['\u00f7 \u03b1 (0.85)','+'+nd((1/alpha-1)*100,1)+'%'],['\u2192 Base',$d(Base)+'/pi\u00b2']],
+    function(){
+      var comps=[['MP',MP,'#3B8BD4'],['GS',GS,'#1D9E75'],['PS',PS,'#BA7517'],['F',F,'#993556']];
+      var bw=150,bh=20,bx=20,by=38,cx=bx,bars='',lbls='';
+      comps.forEach(function(row){
+        var lbl=row[0],v=row[1],col=row[2];
+        var w=v/rawBase*bw;
+        bars+='<rect x="'+cx+'" y="'+by+'" width="'+w+'" height="'+bh+'" fill="'+col+'" opacity=".75"/>';
+        if(w>16) lbls+=tx(cx+w/2, by+bh/2+4, lbl, 'middle', '#fff', 8.5);
+        cx+=w;
+      });
+      var sw=bw/alpha;
+      return svgW(
+        tx(130,16,'Cost components \u2192 Base rate')
+        +tx(20,28,'Raw sum: '+nd(rawBase,2)+'/pi\u00b2','start','var(--color-text-tertiary)',8.5)
+        +bars+lbls
+        +'<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="none" stroke="var(--color-border-primary)" stroke-width=".5"/>'
+        +'<line x1="'+(bx+bw)+'" y1="'+(by+bh/2)+'" x2="'+(bx+sw)+'" y2="'+(by+bh/2)+'" stroke="'+C_WARN+'" stroke-width=".75" marker-end="url(#arr)"/>'
+        +'<rect x="'+bx+'" y="'+(by+bh+10)+'" width="'+sw+'" height="'+bh+'" fill="'+C_WARN+'" opacity=".15" stroke="'+C_WARN+'" stroke-width=".5" stroke-dasharray="3 2"/>'
+        +tx(bx+sw/2, by+bh+10+bh/2+4, 'Base = '+$d(Base)+'/pi\u00b2', 'middle', C_WARN)
+        +tx(bx+bw+4, by+bh/2-3, '\u00f7\u03b1', 'start', C_WARN, 8.5)
+      , by+bh+10+bh+18);
+    }));
+
+  // 6 — BOUNDING BOX
+  steps.push(makeStep(idx++,'Bounding box \u2014 piece area & brut cost',$d(Cost_brut),'',
+    'A_brut = '+nd(A)+'" + \u03b4('+delta+'") = '+nd(A_b,3)+'"\n'
+    +'C_brut = '+nd(C)+'" + 1.0" = '+nd(C_b,3)+'"\n'
+    +'S = ('+nd(A_b,3)+'/12)\u00d7('+nd(C_b,3)+'/12) = '+nd(S,3)+' pi\u00b2\n'
+    +'Cost_brut = '+nd(S,3)+'\u00d7'+$d(Base)+' = '+$d(Cost_brut),
+    'The piece is always priced from the <b>smallest rectangle enclosing it</b>. You buy the block; waste carved away is the cost of the shape. A gets +'+delta+'" blade kerf; C gets +1.0" entry/exit.',
+    [['A_brut',nd(A_b,3)+'"'],['C_brut',nd(C_b,3)+'"'],['S',nd(S,3)+' pi\u00b2'],['\u00d7 Base',$d(Base)+'/pi\u00b2'],['\u2192 Cost_brut',$d(Cost_brut)]],
+    function(){ return diagBBox(A,C,A_b,C_b,SHAPE); }
+  ));
+
+  // 7 — ANGLE (optional)
+  if(hasAngle){
+    var mextWarn=(B<=3.5&&MEXT_MODE==='observed');
+    var mLabel=MEXT_MODE==='observed'?(B<=3.5?'\u00d71.25\u00b2 (observed, Ex.3)':'\u00d7'+nd(m_table,1)+' (table)'):'\u00d7'+nd(m_table,1)+' (table)';
+    var capturedM=m_used, capturedSa=S_angle, capturedPa=P_angle, capturedCa=Cost_angle, capturedB=B, capturedF=F;
+    steps.push(makeStep(idx++,'Angle cut \u2014 45\u00b0 chamfer',$d(Cost_angle),mextWarn?'\u26a0\ufe0f unconfirmed':'',
+      'S_angle = A_brut / sin(45\u00b0) / 12\n'
+      +'        = '+nd(A_b,3)+' / 0.7071 / 12 = '+nd(S_angle,3)+' pi.lin\n'
+      +'P_angle = F \u00d7 m_ext = '+$d(F)+' \u00d7 '+nd(m_used,4)+' = '+$d(P_angle)+'/pi.lin\n'
+      +'Cost = '+nd(S_angle,3)+' \u00d7 '+$d(P_angle)+' / ('+b1+'\u00d7'+b2+')\n'
+      +'     = '+$d(Cost_angle),
+      'The chamfer blade travels diagonally across A \u2014 at 45\u00b0 the path is A\u00d7\u221a2 (longer than A). m_ext converts the $/pi\u00b2 finish rate to $/pi.lin scaled by thickness. Machining overhead \u00f7\u03b2\u2081\u03b2\u2082 applies.',
+      [['S_angle',nd(S_angle,3)+' pi.lin'],['m_ext ('+MEXT_MODE+')',mLabel,mextWarn],['P_angle',$d(P_angle)+'/pi.lin'],['\u00f7 \u03b2\u2081\u00d7\u03b2\u2082','\u00f7'+nd(b1*b2,3)],['\u2192 Cost_angle',$d(Cost_angle)]],
+      function(){ return diagAngle(A_b, capturedSa, capturedPa, capturedCa, capturedM, capturedB, capturedF); }
+    ));
+  }
+
+  // 8 — BRULAGE (optional)
+  if(hasBrulage){
+    var capturedL=L_brul, capturedCb=Cost_brul, capturedBr=brulRate;
+    steps.push(makeStep(idx++,'Br\u00fblage service \u2014 curved edge finish',$d(Cost_brul),'\u26a0\ufe0f rate unconfirmed',
+      'L_br\u00fblage = C \u00d7 \u03ba / 12\n'
+      +'         = '+nd(C,2)+'" \u00d7 '+kappa+' / 12 = '+nd(L_brul,3)+' pi.lin\n'
+      +'Cost = '+nd(L_brul,3)+' \u00d7 '+$d(brulRate)+' / ('+b1+'\u00d7'+b2+')\n'
+      +'     = '+$d(Cost_brul),
+      'When br\u00fbl\u00e9 is applied to a curved edge rather than a flat face it is billed per lineal foot. \u03ba=1.4 is a path-length factor: the torch follows the arc, ~1.4\u00d7 the plan length. Rate ('+$d(brulRate)+'/pi.lin) is unconfirmed.',
+      [['C (length)',nd(C,2)+'"'],['\u03ba (path factor)',kappa],['L_br\u00fblage',nd(L_brul,3)+' pi.lin'],['Rate',$d(brulRate)+'/pi.lin',true],['\u00f7 \u03b2\u2081\u00d7\u03b2\u2082','\u00f7'+nd(b1*b2,3)],['\u2192 Cost_brul',$d(Cost_brul)]],
+      function(){ return diagBrulage(C, capturedL, capturedBr, capturedCb, kappa, SHAPE); }
+    ));
+  }
+
+  // FINAL
+  var capturedCb2=Cost_brut, capturedCa2=Cost_angle, capturedCbr2=Cost_brul;
+  steps.push(makeStep(idx++,'Final price \u2014 client markup',$d(unit)+'/piece','',
+    'ST = '+$d(Cost_brut)+(hasAngle?' + '+$d(Cost_angle):'')+(hasBrulage?' + '+$d(Cost_brul):'')+'\n'
+    +'   = '+$d(ST)+'\n'
+    +'Price = ST / \u03b3 = '+$d(ST)+' / '+gamma+' = '+$d(unit)+'\n'
+    +'Total = '+$d(unit)+' \u00d7 '+QTY+' = '+$d(total),
+    'Dividing by \u03b3='+gamma+' = \u00d7'+nd(1/gamma,3)+', adding <b>'+nd((1/gamma-1)*100,1)+'% margin</b>. Official Particulier cascade = \u00f70.684 (+46%), but \u00f70.85 (+18%) is consistently observed in practice.',
+    [['Cost_brut',$d(Cost_brut)],['Machining',$d(Cost_mach)],['ST',$d(ST)],['\u00f7 \u03b3 ('+gamma+')','+'+nd((1/gamma-1)*100,1)+'%'],['\u2192 Unit',$d(unit)],['\u00d7 '+QTY,$d(total)]],
+    function(){ return diagFinal(capturedCb2, capturedCa2, capturedCbr2, ST, unit, gamma, hasAngle, hasBrulage); },
+    true
+  ));
+
+  var col=document.getElementById('steps-col');
+  col.innerHTML='';
+  steps.forEach(function(s){ col.appendChild(s.el); });
+  steps.forEach(function(s){
+    try{
+      var el=document.getElementById(s.diagId);
+      if(el) el.innerHTML=s.diagFn();
+    } catch(e){
+      var el=document.getElementById(s.diagId);
+      if(el) el.innerHTML='<p style="font-size:10px;color:var(--color-text-tertiary);padding:8px">diagram error: '+e.message+'</p>';
+    }
+  });
+}
+
+function diagBBox(A,C,A_b,C_b,shape){
+  var pw=170,ph=90,ox=16,oy=18;
+  var sc=Math.min(pw/(C_b||1),ph/(A_b||1));
+  var bw=C_b*sc,bh=A_b*sc,nw=C*sc,nh=A*sc;
+  var bx=ox,by=oy,nx=bx+(bw-nw)/2,ny=by+(bh-nh)/2;
+  var net,waste='';
+  if(shape==='rect'){
+    net='M'+nx+' '+ny+' L'+(nx+nw)+' '+ny+' L'+(nx+nw)+' '+(ny+nh)+' L'+nx+' '+(ny+nh)+' Z';
+  } else if(shape==='chamfer'){
+    var ch=Math.min(nh*.35,nw*.28);
+    net='M'+(nx+ch)+' '+ny+' L'+(nx+nw)+' '+ny+' L'+(nx+nw)+' '+(ny+nh)+' L'+nx+' '+(ny+nh)+' L'+nx+' '+(ny+ch)+' Z';
+    waste='<path d="M'+nx+' '+ny+' L'+(nx+ch)+' '+ny+' L'+nx+' '+(ny+ch)+' Z" fill="var(--color-background-tertiary)" opacity=".5"/>';
+  } else if(shape==='coping'){
+    net='M'+nx+' '+(ny+nh*.28)+' Q'+(nx+nw/2)+' '+ny+' '+(nx+nw)+' '+(ny+nh*.28)+' L'+(nx+nw)+' '+(ny+nh*.72)+' Q'+(nx+nw/2)+' '+(ny+nh)+' '+nx+' '+(ny+nh*.72)+' Z';
+    waste='<path d="M'+bx+' '+by+' L'+(bx+bw)+' '+by+' L'+(nx+nw)+' '+(ny+nh*.28)+' Q'+(nx+nw/2)+' '+ny+' '+nx+' '+(ny+nh*.28)+' Z" fill="var(--color-background-tertiary)" opacity=".4"/>'
+         +'<path d="M'+bx+' '+(by+bh)+' L'+(bx+bw)+' '+(by+bh)+' L'+(nx+nw)+' '+(ny+nh*.72)+' Q'+(nx+nw/2)+' '+(ny+nh)+' '+nx+' '+(ny+nh*.72)+' Z" fill="var(--color-background-tertiary)" opacity=".4"/>';
+  } else {
+    var tap=nw*.2;
+    net='M'+(nx+tap)+' '+ny+' L'+(nx+nw)+' '+ny+' L'+(nx+nw)+' '+(ny+nh)+' L'+nx+' '+(ny+nh)+' L'+nx+' '+(ny+nh*.42)+' Z';
+    waste='<path d="M'+nx+' '+ny+' L'+(nx+tap)+' '+ny+' L'+nx+' '+(ny+nh*.42)+' Z" fill="var(--color-background-tertiary)" opacity=".5"/>';
+  }
+  var h=oy+bh+46;
+  return svgW(
+    '<rect x="'+bx+'" y="'+by+'" width="'+bw+'" height="'+bh+'" fill="none" stroke="'+C_WARN+'" stroke-width=".75" stroke-dasharray="3 2" rx="1"/>'
+    +waste
+    +'<path d="'+net+'" fill="var(--color-background-secondary)" stroke="var(--color-border-primary)" stroke-width="1"/>'
+    +'<line x1="'+bx+'" y1="'+(by+bh+12)+'" x2="'+(bx+bw)+'" y2="'+(by+bh+12)+'" stroke="'+C_DIM+'" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>'
+    +tx(bx+bw/2, by+bh+22, 'C_brut = '+nd(C_b,2)+'"', 'middle', C_DIM)
+    +'<line x1="'+(bx+bw+14)+'" y1="'+by+'" x2="'+(bx+bw+14)+'" y2="'+(by+bh)+'" stroke="'+C_DIM+'" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>'
+    +tx(bx+bw+18, by+bh/2-5, 'A_brut', 'start', C_DIM)
+    +tx(bx+bw+18, by+bh/2+7, nd(A_b,2)+'"', 'start', C_DIM)
+    +tx(bx+bw/2, by+bh+34, 'you pay for the whole dashed box', 'middle', 'var(--color-text-tertiary)', 8.5)
+  , h);
+}
+
+function diagAngle(A_b, S_angle, P_angle, Cost_angle, m, B, F){
+  var ax=40,ay=20,aw=80,ah=90,chX=aw*.4,chY=ah*.4;
+  var rotStr='transform="rotate(-90,'+(ax-16)+','+(ay+ah/2)+')"';
+  return svgW(
+    tx(130,12,'45\u00b0 chamfer \u2014 blade path')
+    +'<rect x="'+ax+'" y="'+ay+'" width="'+aw+'" height="'+ah+'" fill="var(--color-background-secondary)" stroke="var(--color-border-secondary)" stroke-width=".75"/>'
+    +'<path d="M'+ax+' '+ay+' L'+(ax+chX)+' '+ay+' L'+ax+' '+(ay+chY)+' Z" fill="var(--color-background-tertiary)" opacity=".6"/>'
+    +'<line x1="'+(ax+chX)+'" y1="'+ay+'" x2="'+ax+'" y2="'+(ay+chY)+'" stroke="'+C_WARN+'" stroke-width="1.5"/>'
+    +'<line x1="'+(ax-12)+'" y1="'+ay+'" x2="'+(ax-12)+'" y2="'+(ay+ah)+'" stroke="'+C_DIM+'" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>'
+    +tx(ax-16, ay+ah/2, 'A_b', 'middle', C_DIM, 8.5, rotStr)
+    +tx(130, ay+25, 'path = A_b / sin45\u00b0 = '+nd(S_angle,2)+' pi.lin', 'middle', C_WARN, 9)
+    +tx(130, ay+39, 'P_angle = F('+nd(F,2)+') \u00d7 m('+nd(m,3)+') = '+nd(P_angle,2)+'/pi.lin', 'middle', 'var(--color-text-secondary)', 9)
+    +tx(130, ay+53, '\u00f7 (\u03b2\u2081\u00d7\u03b2\u2082=0.855) \u2192 '+$d(Cost_angle), 'middle', C_OK, 9)
+    +'<line x1="20" y1="'+(ay+62)+'" x2="240" y2="'+(ay+62)+'" stroke="var(--color-border-tertiary)" stroke-width=".4"/>'
+    +tx(20, ay+75, 'm_ext for B='+nd(B,2)+'"', 'start', 'var(--color-text-tertiary)', 8.5)
+    +tx(20, ay+87, 'table: \u00d7'+nd(mExt(B),1)+'   observed: \u00d71.25\u00b2 = \u00d7'+nd(1.5625,3), 'start', 'var(--color-text-tertiary)', 8.5)
+  , ay+ah+72);
+}
+
+function diagBrulage(C, L, rate, cost, kappa, shape){
+  var lx=20,ly=28,lw=180,lh=16;
+  return svgW(
+    tx(130,14,'Br\u00fblage path (plan view)')
+    +'<line x1="'+lx+'" y1="'+(ly+lh/2)+'" x2="'+(lx+lw)+'" y2="'+(ly+lh/2)+'" stroke="var(--color-border-secondary)" stroke-width="1" stroke-dasharray="3 2"/>'
+    +tx(lx+lw/2, ly+lh/2+14, 'C = '+nd(C,2)+'"', 'middle', 'var(--color-text-tertiary)', 8.5)
+    +'<path d="M'+lx+' '+(ly+lh+30)+' Q'+(lx+lw/2)+' '+(ly+lh+14)+' '+(lx+lw)+' '+(ly+lh+30)+'" fill="none" stroke="'+C_WARN+'" stroke-width="1.5"/>'
+    +tx(lx+lw/2, ly+lh+50, 'torch path = C \u00d7 \u03ba('+kappa+') / 12 = '+nd(L,3)+' pi.lin', 'middle', C_WARN, 9)
+    +tx(lx+lw/2, ly+lh+63, nd(L,3)+' \u00d7 '+$d(rate)+' / 0.855 = '+$d(cost), 'middle', C_OK, 9)
+    +'<line x1="20" y1="'+(ly+lh+76)+'" x2="240" y2="'+(ly+lh+76)+'" stroke="var(--color-border-tertiary)" stroke-width=".4"/>'
+    +tx(20, ly+lh+88, '\u26a0\ufe0f rate ('+$d(rate)+'/pi.lin) is unconfirmed \u2014 see open Q9', 'start', 'var(--color-text-warning)', 8.5)
+  , ly+lh+100);
+}
+
+function diagFinal(cb, ca, cbr, ST, unit, gamma, hasAngle, hasBrulage){
+  var items=[['Cost brut',cb,'#3B8BD4']];
+  if(hasAngle) items.push(['Angle',ca,'#BA7517']);
+  if(hasBrulage) items.push(['Br\u00fblage',cbr,'#993556']);
+  var maxV=unit*1.05,bw=160,bx=60,bh=16,by=28,out='';
+  items.forEach(function(row){
+    var lbl=row[0],v=row[1],col=row[2];
+    var w=v/maxV*bw;
+    out+='<rect x="'+bx+'" y="'+(by-12)+'" width="'+w+'" height="'+bh+'" fill="'+col+'" opacity=".6" rx="2"/>';
+    out+=tx(bx-4, by, lbl, 'end', 'var(--color-text-secondary)', 9);
+    out+=tx(bx+w+4, by, '$'+v.toFixed(2), 'start', 'var(--color-text-secondary)', 9);
+    by+=22;
+  });
+  var stW=ST/maxV*bw, uW=unit/maxV*bw;
+  out+='<line x1="'+bx+'" y1="'+(by-4)+'" x2="'+(bx+stW)+'" y2="'+(by-4)+'" stroke="var(--color-border-tertiary)" stroke-width=".5"/>';
+  out+=tx(bx-4, by+6, 'ST', 'end', 'var(--color-text-secondary)', 9);
+  out+=tx(bx+stW+4, by+6, '$'+ST.toFixed(2), 'start', 'var(--color-text-secondary)', 9);
+  by+=22;
+  out+='<rect x="'+bx+'" y="'+(by-12)+'" width="'+uW+'" height="'+bh+'" fill="'+C_WARN+'" opacity=".2" rx="2"/>';
+  out+='<rect x="'+bx+'" y="'+(by-12)+'" width="'+stW+'" height="'+bh+'" fill="none" stroke="'+C_WARN+'" stroke-width=".5" stroke-dasharray="3 2" rx="2"/>';
+  out+=tx(bx-4, by, '\u00f7\u03b3', 'end', C_WARN, 9);
+  out+=tx(bx+uW+4, by, '$'+unit.toFixed(2)+'/piece', 'start', C_WARN, 9);
+  return svgW(out, by+20);
+}
+
+calc();
+</script>

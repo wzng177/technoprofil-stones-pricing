@@ -1,0 +1,461 @@
+
+<style>
+  :root { --stone:#888780; --cut:#E8593C; --dim:#3B8BD4; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+
+  .wrap { padding: 1rem 0; }
+
+  .presets { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .preset-btn {
+    font-size: 12px; padding: 5px 12px; border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--color-border-secondary);
+    background: var(--color-background-secondary);
+    color: var(--color-text-secondary); cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .preset-btn:hover, .preset-btn.active {
+    background: var(--color-background-tertiary);
+    color: var(--color-text-primary);
+    border-color: var(--color-border-primary);
+  }
+
+  .layout { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; align-items: start; }
+  @media (max-width: 640px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+
+  .panel-title { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 1rem; font-weight: 500; }
+
+  .field { margin-bottom: 12px; }
+  .field label { display: block; font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; }
+  .field input, .field select { width: 100%; font-size: 13px; }
+  .unit { font-size: 11px; color: var(--color-text-tertiary); margin-top: 3px; }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-size: 13px; color: var(--color-text-secondary); }
+  .toggle-track { position: relative; width: 32px; height: 18px; background: var(--color-border-secondary); border-radius: 9px; display: inline-block; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+  .toggle-track:has(input:checked) { background: var(--color-text-info); }
+  .toggle-thumb { position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: transform .2s; pointer-events: none; }
+  input[type=checkbox]:checked ~ .toggle-thumb { transform: translateX(14px); }
+  .toggle-input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; margin: 0; }
+
+  .step-list { display: flex; flex-direction: column; gap: 8px; }
+  .step {
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-md);
+    overflow: hidden;
+  }
+  .step-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 9px 12px; cursor: pointer;
+    background: var(--color-background-secondary);
+    border-bottom: 0.5px solid transparent;
+    transition: border-color .15s;
+  }
+  .step.open .step-header { border-color: var(--color-border-tertiary); }
+  .step-label { font-size: 12px; font-weight: 500; color: var(--color-text-primary); display: flex; align-items: center; gap: 8px; }
+  .step-num { font-size: 10px; background: var(--color-background-tertiary); border: 0.5px solid var(--color-border-tertiary); border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; color: var(--color-text-secondary); flex-shrink: 0; }
+  .step-val { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .step-body { padding: 10px 12px; display: none; }
+  .step.open .step-body { display: block; }
+
+  .formula { font-family: var(--font-mono); font-size: 11px; background: var(--color-background-tertiary); padding: 6px 8px; border-radius: var(--border-radius-md); color: var(--color-text-secondary); margin-bottom: 8px; line-height: 1.7; word-break: break-all; }
+  .insight { font-size: 12px; color: var(--color-text-secondary); line-height: 1.6; border-left: 2px solid var(--color-border-secondary); padding-left: 8px; }
+  .sub-rows { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .sub-row { display: flex; justify-content: space-between; font-size: 12px; }
+  .sub-row span:first-child { color: var(--color-text-secondary); }
+  .sub-row span:last-child { font-weight: 500; }
+
+  .total-card { margin-top: 1rem; background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .total-item .lbl { font-size: 11px; color: var(--color-text-tertiary); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .total-item .val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+  .total-item .sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+
+  .warn { font-size: 11px; color: var(--color-text-warning); margin-top: 4px; }
+
+  svg text { font-family: var(--font-sans); }
+</style>
+
+<div class="wrap">
+
+<div class="presets">
+  <span style="font-size:12px;color:var(--color-text-tertiary);align-self:center;margin-right:4px">Presets:</span>
+  <button class="preset-btn active" onclick="loadPreset('ex3')">Ex.3 — Crystal Gold sill</button>
+  <button class="preset-btn" onclick="loadPreset('ex4')">Ex.4 — Spoerry stair nose</button>
+  <button class="preset-btn" onclick="loadPreset('ex2')">Ex.2 — ANCM coping (B=12")</button>
+  <button class="preset-btn" onclick="loadPreset('blank')">Blank</button>
+</div>
+
+<div class="layout">
+
+  <div>
+    <div class="panel" style="margin-bottom:1rem">
+      <div class="panel-title">Stone &amp; price</div>
+      <div class="field">
+        <label>Material family</label>
+        <select id="famille" onchange="compute()">
+          <option value="granit">Granit</option>
+          <option value="calcaire">Calcaire</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Surface finish</label>
+        <select id="fini" onchange="compute()">
+          <option value="brule">Brûlé — 3.50$/pi²</option>
+          <option value="brule_cg">Brûlé Crystal Gold — 2.50$/pi²</option>
+          <option value="jet_sable">Jet de sable — 3.50$/pi²</option>
+          <option value="meule">Meulé — 3.00$/pi²</option>
+          <option value="poli_glace">Poli glacé — 5.00$/pi²</option>
+          <option value="bouchard_gros">Bouchardé gros — 5.50$/pi²</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Price per pi³ (P)</label>
+        <input type="number" id="P" value="53" step="0.5" oninput="compute()">
+        <div class="unit">$/pi³ — from stone supplier</div>
+      </div>
+      <div class="field">
+        <label>Client type</label>
+        <select id="client" onchange="compute()">
+          <option value="particulier">Particulier ÷0.85</option>
+          <option value="distributeur">Distributeur ÷0.855</option>
+          <option value="contracteur_lo">Contracteur &lt;3 000$ ÷0.70</option>
+          <option value="contracteur_mid">Contracteur 3–10 k$ ÷0.85</option>
+          <option value="contracteur_hi">Contracteur &gt;10 k$ ÷0.90</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Quantity (QTY)</label>
+        <input type="number" id="QTY" value="4" min="1" step="1" oninput="compute()">
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Piece dimensions</div>
+      <div class="row2">
+        <div class="field">
+          <label>B — thickness</label>
+          <input type="number" id="B" value="2" step="0.125" oninput="compute()">
+          <div class="unit">inches</div>
+        </div>
+        <div class="field">
+          <label>A — depth</label>
+          <input type="number" id="A" value="18.875" step="0.0625" oninput="compute()">
+          <div class="unit">inches</div>
+        </div>
+      </div>
+      <div class="field">
+        <label>C — length</label>
+        <input type="number" id="C" value="27.5625" step="0.0625" oninput="compute()">
+        <div class="unit">inches</div>
+      </div>
+      <div class="toggle-row">
+        <span>Angle cut (45° chamfer on A face)</span>
+        <label class="toggle-track">
+          <input type="checkbox" class="toggle-input" id="hasAngle" checked onchange="compute()">
+          <span class="toggle-thumb"></span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel" style="margin-bottom:1rem">
+      <div class="panel-title">Piece diagram</div>
+      <svg id="shape-svg" width="100%" viewBox="0 0 300 200"></svg>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Calculation steps</div>
+      <div class="step-list" id="steps"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="total-card" id="total-card">
+  <div class="total-item">
+    <div class="lbl">Unit price</div>
+    <div class="val" id="t-unit">—</div>
+    <div class="sub" id="t-sub">per piece</div>
+  </div>
+  <div class="total-item">
+    <div class="lbl">Total order</div>
+    <div class="val" id="t-total">—</div>
+    <div class="sub" id="t-qty">—</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const PRESETS = {
+  ex3: { B:2, A:18.875, C:27.5625, P:53, famille:'granit', fini:'brule_cg', client:'particulier', QTY:4, hasAngle:true },
+  ex4: { B:2, A:11.89, C:39.33, P:44, famille:'granit', fini:'brule_cg', client:'particulier', QTY:1, hasAngle:false },
+  ex2: { B:12, A:22.99, C:86.17, P:24.5, famille:'granit', fini:'brule', client:'distributeur', QTY:1, hasAngle:false },
+  blank: { B:2, A:12, C:24, P:50, famille:'granit', fini:'brule', client:'particulier', QTY:1, hasAngle:false }
+};
+
+const F_TABLE = {
+  granit: { brule:3.50, brule_cg:2.50, jet_sable:3.50, meule:3.00, poli_glace:5.00, bouchard_gros:5.50 },
+  calcaire: { brule:0, brule_cg:0, jet_sable:2.50, meule:0.75, poli_glace:5.00, bouchard_gros:3.50 }
+};
+
+const PS_TABLE = {
+  granit:  [[2,3.50],[3,3.75],[4.5,4.00],[5.5,4.50],[6.5,5.50],[8,6.00],[10,7.00],[12,7.50],[14,8.00],[16,8.50],[20,9.50],[24,10.50],[28,12.50],[32,14.50],[34,16.50],[36,17.50],[38,18.50],[40,19.50]],
+  calcaire:[[2,2.50],[3,3.00],[4.5,3.50],[5.5,4.00],[6.5,5.00],[8,5.00],[10,6.50],[12,7.00],[14,7.50],[16,8.00],[20,8.50],[24,10.00],[28,12.50],[32,14.00],[34,16.00],[36,17.00],[38,18.00],[40,19.00]]
+};
+
+const PASSES_TABLE = [[1,4.50],[2,5.20],[3,5.70],[4,6.60],[5,7.50],[10,11.20],[15,15.00],[20,18.70],[25,22.40],[30,26.20],[35,30.00],[40,33.75],[45,37.50]];
+
+const CLIENT_GAMMA = { particulier:0.85, distributeur:0.855, contracteur_lo:0.70, contracteur_mid:0.85, contracteur_hi:0.90 };
+
+function lookupPS(famille, B) {
+  const tbl = PS_TABLE[famille];
+  for (let i=0; i<tbl.length; i++) { if (B <= tbl[i][0]) return tbl[i][1]; }
+  return tbl[tbl.length-1][1];
+}
+
+function lookupPasses(n) {
+  const t = PASSES_TABLE;
+  if (n <= t[0][0]) return t[0][1];
+  for (let i=1; i<t.length; i++) {
+    if (n <= t[i][0]) {
+      const [n0,c0]=t[i-1], [n1,c1]=t[i];
+      return c0 + (n-n0)/(n1-n0)*(c1-c0);
+    }
+  }
+  return t[t.length-1][1];
+}
+
+function debitage(famille, B) {
+  if (B <= 1.75) return { flat:true, rate:3.50, passes:null };
+  if (B <= 3.5)  return { flat:true, rate:4.50, passes:null };
+  const inc = famille==='granit' ? 1.25 : 1.0;
+  const rawP = B / inc;
+  const p = Math.ceil(rawP);
+  return { flat:false, passes:p, rawPasses:rawP, rate:lookupPasses(p), inc };
+}
+
+function mExt(B) {
+  if (B <= 3.5)  return 1.0;
+  if (B <= 6)    return 1.5;
+  if (B <= 8)    return 2.0;
+  if (B <= 10)   return 2.5;
+  if (B <= 12)   return 3.0;
+  return 3.0;
+}
+
+function fmt(n, dec=2) { return '$' + n.toFixed(dec); }
+function fmtN(n, dec=2) { return n.toFixed(dec); }
+
+function compute() {
+  const B = parseFloat(document.getElementById('B').value)||0;
+  const A = parseFloat(document.getElementById('A').value)||0;
+  const C = parseFloat(document.getElementById('C').value)||0;
+  const P = parseFloat(document.getElementById('P').value)||0;
+  const famille = document.getElementById('famille').value;
+  const fini = document.getElementById('fini').value;
+  const client = document.getElementById('client').value;
+  const QTY = parseInt(document.getElementById('QTY').value)||1;
+  const hasAngle = document.getElementById('hasAngle').checked;
+
+  const delta=0.25, deltaB=0.5, alpha=0.85, beta1=0.95, beta2=0.90;
+  const gamma = CLIENT_GAMMA[client];
+  const K=12+delta, eta=Math.pow(K/12,2);
+
+  const F = F_TABLE[famille]?.[fini] ?? 0;
+  const MP = P * (B+deltaB)/12 * eta;
+  const deb = debitage(famille, B);
+  const GS = deb.rate;
+  const PS = lookupPS(famille, B);
+  const rawBase = MP + GS + PS + F;
+  const Base = rawBase / alpha;
+
+  const A_brut = A + delta;
+  const C_brut = C + 1.0;
+  const S = (A_brut/12) * (C_brut/12);
+  const Cost_brut = S * Base;
+
+  let Cost_angle = 0, S_angle = 0, P_angle = 0;
+  const m = mExt(B);
+  if (hasAngle) {
+    S_angle = A_brut / Math.sin(Math.PI/4) / 12;
+    P_angle = F * m;
+    Cost_angle = S_angle * P_angle / (beta1 * beta2);
+  }
+
+  const ST = Cost_brut + Cost_angle;
+  const Price_unit = ST / gamma;
+  const Price_total = Price_unit * QTY;
+
+  drawShape(B, A, C, hasAngle);
+
+  const steps = [
+    {
+      id:'mp', label:'MP — material cost per pi²', val: fmt(MP),
+      formula:`MP = P × (B + ΔB) / 12 × η\n   = ${fmtN(P)} × (${fmtN(B)} + ${deltaB}) / 12 × ${fmtN(eta,4)}\n   = ${fmt(MP)}`,
+      insight:`You buy stone at ${fmt(P)}/pi³. A ${fmtN(B)}" piece needs ${fmtN((B+deltaB)/12,4)} pi of depth per pi² of face. The η factor (${fmtN(eta,4)}) adds ~${fmtN((eta-1)*100,1)}% for material lost to the blade kerf in both planar directions.`,
+      subs:[
+        ['P (stone price)',fmt(P)+'/pi³'],
+        ['B + ΔB (bracketed thickness)',fmtN(B+deltaB,3)+'"'],
+        ['η (area waste factor)',fmtN(eta,4)],
+        ['→ MP',fmt(MP)+'/pi²']
+      ]
+    },
+    {
+      id:'gs', label:'GS — débitage (trimming to plan)', val: fmt(GS),
+      formula: deb.flat
+        ? `GS = flat rate for B=${fmtN(B)}" (${famille})\n   = ${fmt(GS)}/pi²`
+        : `Passes = B / inc = ${fmtN(B)}" / ${fmtN(deb.inc,2)}"/pass = ${fmtN(deb.rawPasses,2)}\n→ round up to ${deb.passes} passes\nGS = lookup(${deb.passes} passes) = ${fmt(GS)}/pi²`,
+      insight: deb.flat
+        ? `B=${fmtN(B)}" falls in the flat-rate bracket — no pass calculation needed.`
+        : `The blade removes ${fmtN(deb.inc,2)}" of ${famille} per pass. For B=${fmtN(B)}", that's ${fmtN(deb.rawPasses,2)} passes, rounded up to ${deb.passes}. More passes = more machine time = higher cost.`,
+      subs: deb.flat ? [['Rate (flat bracket)',fmt(GS)+'/pi²']] : [['B / inches_per_pass',fmtN(deb.rawPasses,2)+' passes'],['Rounded up to',deb.passes+' passes'],['→ GS',fmt(GS)+'/pi²']]
+    },
+    {
+      id:'ps', label:'PS — sciage primaire (primary cut)', val: fmt(PS),
+      formula:`PS = lookup_PS(${famille}, B=${fmtN(B)}")\n   = ${fmt(PS)}/pi²`,
+      insight:`The primary block-to-slab cut. Looked up directly from the bracket table by material and thickness. Granit is harder so it costs more than calcaire at equal thickness.`,
+      subs:[['Material',famille],['B bracket',fmtN(B,3)+'"'],['→ PS',fmt(PS)+'/pi²']]
+    },
+    {
+      id:'f', label:'F — surface finish', val: fmt(F),
+      formula:`F = lookup_F(${famille}, ${fini})\n   = ${fmt(F)}/pi²`,
+      insight:`Applied to every pi² of visible face. Harder finishes (piqué, éclaté) cost more. Granit is harder to finish than calcaire.`,
+      subs:[['Finish',fini],['→ F',fmt(F)+'/pi²']]
+    },
+    {
+      id:'base', label:'Base rate — all costs per pi²', val: fmt(Base),
+      formula:`Base = (MP + GS + PS + F) / α\n     = (${fmt(MP)} + ${fmt(GS)} + ${fmt(PS)} + ${fmt(F)}) / ${alpha}\n     = ${fmt(rawBase)} / ${alpha}\n     = ${fmt(Base)}/pi²`,
+      insight:`The four costs are summed and divided by α=${alpha}. Dividing by 0.85 = multiplying by ${fmtN(1/alpha,3)}, which adds ${fmtN((1/alpha-1)*100,1)}% overhead. This embeds the first two client cascade steps (÷0.95 × ÷0.90 ≈ ÷0.855).`,
+      subs:[['MP + GS + PS + F',fmt(rawBase)+'/pi²'],['÷ α ('+alpha+')','+'+fmtN((1/alpha-1)*100,1)+'%'],['→ Base',fmt(Base)+'/pi²']]
+    },
+    {
+      id:'bbox', label:'Bounding box — piece area', val: fmt(Cost_brut),
+      formula:`A_brut = A + δ = ${fmtN(A)}" + ${delta}" = ${fmtN(A_brut,3)}"\nC_brut = C + 1.0" = ${fmtN(C)}" + 1.0" = ${fmtN(C_brut,4)}"\nS = (${fmtN(A_brut,3)}/12) × (${fmtN(C_brut,4)}/12) = ${fmtN(S,3)} pi²\nCost = ${fmtN(S,3)} × ${fmt(Base)} = ${fmt(Cost_brut)}`,
+      insight:`A rectangle enclosing the piece. A gets a blade-kerf allowance (${delta}"), C gets a 1.0" entry/exit allowance. You pay for the whole rectangle — waste carved away to reach the net shape is your cost of having that shape.`,
+      subs:[['A_brut',fmtN(A_brut,3)+'"'],['C_brut',fmtN(C_brut,4)+'"'],['S (area)',fmtN(S,3)+' pi²'],['× Base',fmt(Base)+'/pi²'],['→ Cost_brut',fmt(Cost_brut)]]
+    },
+    ...(hasAngle ? [{
+      id:'angle', label:'Angle cut (45° chamfer)', val: fmt(Cost_angle),
+      formula:`S_angle = A_brut / sin(45°) / 12\n        = ${fmtN(A_brut,3)} / 0.7071 / 12 = ${fmtN(S_angle,3)} pi.lin\nP_angle = F × m_ext(B=${fmtN(B)}")\n        = ${fmt(F)} × ${fmtN(m,1)} = ${fmt(P_angle)}/pi.lin\nCost = ${fmtN(S_angle,3)} × ${fmt(P_angle)} / (${beta1}×${beta2})\n     = ${fmt(Cost_angle)}`,
+      insight:`The chamfer blade travels diagonally across A. At 45°, the path length is A×√2 ≈ A/0.707 — longer than A itself. m_ext(${fmtN(B)}")=${fmtN(m,1)} scales the finish rate to a $/pi.lin edge rate for this thickness. Machining overhead (÷${beta1}×${beta2}) applies to all shaping operations.`,
+      subs:[['S_angle (blade path)',fmtN(S_angle,3)+' pi.lin'],['m_ext(B)',fmtN(m,1)+'×'],['P_angle',fmt(P_angle)+'/pi.lin'],['÷ β₁×β₂','÷'+fmtN(beta1*beta2,3)],['→ Cost_angle',fmt(Cost_angle)]]
+    }] : []),
+    {
+      id:'final', label:'Final price', val: fmt(Price_unit)+'/piece',
+      formula:`ST = Cost_brut ${hasAngle?'+ Cost_angle':''}\n   = ${fmt(Cost_brut)} ${hasAngle?'+ '+fmt(Cost_angle):''} = ${fmt(ST)}\nPrice_unit = ST / γ = ${fmt(ST)} / ${gamma}\n           = ${fmt(Price_unit)}\nPrice_total = ${fmt(Price_unit)} × ${QTY} = ${fmt(Price_total)}`,
+      insight:`Dividing by γ=${gamma} = multiplying by ${fmtN(1/gamma,3)}, adding ${fmtN((1/gamma-1)*100,1)}% margin for client type. The full Particulier cascade (÷0.95÷0.90÷0.80) gives ÷0.684 total, but ÷0.85 is observed in practice.`,
+      subs:[['Subtotal ST',fmt(ST)],['÷ γ ('+gamma+')','+'+fmtN((1/gamma-1)*100,1)+'%'],['→ Unit price',fmt(Price_unit)],['× QTY ('+QTY+')',fmt(Price_total)+' total']]
+    }
+  ];
+
+  const container = document.getElementById('steps');
+  container.innerHTML = '';
+  steps.forEach((s,i) => {
+    const div = document.createElement('div');
+    div.className = 'step' + (s.id==='final' ? ' open' : '');
+    div.innerHTML = `
+      <div class="step-header" onclick="toggleStep(this)">
+        <span class="step-label"><span class="step-num">${i+1}</span>${s.label}</span>
+        <span class="step-val">${s.val}</span>
+      </div>
+      <div class="step-body">
+        <div class="formula">${s.formula}</div>
+        <div class="insight">${s.insight}</div>
+        <div class="sub-rows">
+          ${s.subs.map(([k,v])=>`<div class="sub-row"><span>${k}</span><span>${v}</span></div>`).join('')}
+        </div>
+      </div>`;
+    container.appendChild(div);
+  });
+
+  document.getElementById('t-unit').textContent = fmt(Price_unit);
+  document.getElementById('t-total').textContent = fmt(Price_total);
+  document.getElementById('t-qty').textContent = QTY + ' × ' + fmt(Price_unit) + '/piece';
+}
+
+function toggleStep(header) {
+  const step = header.parentElement;
+  step.classList.toggle('open');
+}
+
+function drawShape(B, A, C, hasAngle) {
+  const svg = document.getElementById('shape-svg');
+  const pad = 30, vw = 300, vh = 200;
+  const maxW = vw - 2*pad, maxH = vh - 60;
+
+  const scaleX = Math.min(maxW / (C||1));
+  const scaleY = Math.min(maxH / (A||1));
+  const sc = Math.min(scaleX, scaleY, 4);
+
+  const w = C * sc, h = A * sc;
+  const ox = (vw - w) / 2, oy = (vh - h) / 2 - 10;
+
+  let shape, chamfer = '';
+  const angleSize = hasAngle ? Math.min(h * 0.4, w * 0.3) : 0;
+
+  if (hasAngle) {
+    shape = `M ${ox+angleSize} ${oy} L ${ox+w} ${oy} L ${ox+w} ${oy+h} L ${ox} ${oy+h} L ${ox} ${oy+angleSize} Z`;
+    chamfer = `<line x1="${ox+angleSize}" y1="${oy}" x2="${ox}" y2="${oy+angleSize}" stroke="var(--cut)" stroke-width="1.5" stroke-dasharray="3 2"/>`;
+  } else {
+    shape = `M ${ox} ${oy} L ${ox+w} ${oy} L ${ox+w} ${oy+h} L ${ox} ${oy+h} Z`;
+  }
+
+  const cx = ox + w/2, cy = oy + h/2;
+  const tickL = 6;
+
+  const brut_w = (C+1.25)*sc, brut_h = (A+0.25)*sc;
+  const box_ox = (vw - brut_w)/2, box_oy = (vh - brut_h)/2 - 10;
+
+  svg.innerHTML = `
+    <rect x="${box_ox}" y="${box_oy}" width="${brut_w}" height="${brut_h}"
+      fill="none" stroke="var(--color-border-secondary)" stroke-width="0.5" stroke-dasharray="3 3" rx="2"/>
+    <text x="${box_ox + brut_w/2}" y="${box_oy - 6}" text-anchor="middle"
+      font-size="9" fill="var(--color-text-tertiary)" font-family="var(--font-sans)">bounding box (brut)</text>
+
+    <path d="${shape}" fill="var(--color-background-secondary)" stroke="var(--color-border-primary)" stroke-width="1" rx="0"/>
+    ${chamfer}
+
+    ${hasAngle ? `
+    <text x="${ox + angleSize/2 + 6}" y="${oy + angleSize/2 - 4}" font-size="9" fill="var(--cut)" font-family="var(--font-sans)" text-anchor="middle">45°</text>
+    ` : ''}
+
+    <line x1="${ox}" y1="${oy+h+14}" x2="${ox+w}" y2="${oy+h+14}" stroke="var(--dim)" stroke-width="0.75"/>
+    <line x1="${ox}" y1="${oy+h+10}" x2="${ox}" y2="${oy+h+18}" stroke="var(--dim)" stroke-width="0.75"/>
+    <line x1="${ox+w}" y1="${oy+h+10}" x2="${ox+w}" y2="${oy+h+18}" stroke="var(--dim)" stroke-width="0.75"/>
+    <text x="${cx}" y="${oy+h+25}" text-anchor="middle" font-size="9" fill="var(--dim)" font-family="var(--font-sans)">C = ${fmtN2(C)}"</text>
+
+    <line x1="${ox-14}" y1="${oy}" x2="${ox-14}" y2="${oy+h}" stroke="var(--dim)" stroke-width="0.75"/>
+    <line x1="${ox-18}" y1="${oy}" x2="${ox-10}" y2="${oy}" stroke="var(--dim)" stroke-width="0.75"/>
+    <line x1="${ox-18}" y1="${oy+h}" x2="${ox-10}" y2="${oy+h}" stroke="var(--dim)" stroke-width="0.75"/>
+    <text x="${ox-22}" y="${cy}" text-anchor="middle" font-size="9" fill="var(--dim)" font-family="var(--font-sans)"
+      transform="rotate(-90 ${ox-22} ${cy})">A = ${fmtN2(A)}"</text>
+
+    <text x="${vw/2}" y="${vh-4}" text-anchor="middle" font-size="9" fill="var(--color-text-tertiary)" font-family="var(--font-sans)">B (thickness) = ${fmtN2(B)}"</text>
+  `;
+}
+
+function fmtN2(n) { return parseFloat(n.toFixed(4)).toString(); }
+
+function loadPreset(name) {
+  const p = PRESETS[name];
+  document.getElementById('B').value = p.B;
+  document.getElementById('A').value = p.A;
+  document.getElementById('C').value = p.C;
+  document.getElementById('P').value = p.P;
+  document.getElementById('famille').value = p.famille;
+  document.getElementById('fini').value = p.fini;
+  document.getElementById('client').value = p.client;
+  document.getElementById('QTY').value = p.QTY;
+  document.getElementById('hasAngle').checked = p.hasAngle;
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  compute();
+}
+
+compute();
+</script>

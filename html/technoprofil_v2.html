@@ -1,0 +1,498 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px}
+
+.root{padding:1rem 0}
+.top-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;align-items:center}
+.top-label{font-size:11px;color:var(--color-text-tertiary);letter-spacing:.06em;text-transform:uppercase;margin-right:4px}
+.chip{font-size:12px;padding:4px 11px;border-radius:20px;border:.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.chip.on{background:var(--color-background-tertiary);color:var(--color-text-primary);border-color:var(--color-border-primary)}
+
+.cols{display:grid;grid-template-columns:220px 1fr;gap:1.25rem;align-items:start}
+@media(max-width:600px){.cols{grid-template-columns:1fr}}
+
+.card{background:var(--color-background-primary);border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:.9rem 1rem}
+.card+.card{margin-top:.75rem}
+.sec{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--color-text-tertiary);font-weight:500;margin-bottom:.65rem}
+
+.field{margin-bottom:.6rem}
+.field label{display:block;font-size:11px;color:var(--color-text-secondary);margin-bottom:3px}
+.field input,.field select{width:100%;font-size:12px}
+.hint{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+
+.shape-pick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:.65rem}
+.sh-btn{border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:6px 4px;cursor:pointer;text-align:center;background:var(--color-background-secondary);transition:all .15s}
+.sh-btn:hover{border-color:var(--color-border-primary)}
+.sh-btn.on{border-color:var(--color-border-info);background:var(--color-background-info)}
+.sh-btn svg{display:block;margin:0 auto 3px}
+.sh-btn span{font-size:10px;color:var(--color-text-secondary);line-height:1.3;display:block}
+.sh-btn.on span{color:var(--color-text-info)}
+
+.steps-col{display:flex;flex-direction:column;gap:.75rem}
+
+.step-card{border:.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+.step-head{display:flex;align-items:center;gap:10px;padding:.7rem 1rem;background:var(--color-background-secondary);border-bottom:.5px solid var(--color-border-tertiary);cursor:pointer;user-select:none}
+.step-idx{font-size:10px;width:18px;height:18px;border-radius:50%;border:.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;color:var(--color-text-tertiary);flex-shrink:0}
+.step-name{flex:1;font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.step-result{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.step-body{display:none;padding:.9rem 1rem}
+.step-card.open .step-body{display:block}
+
+.step-inner{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
+@media(max-width:520px){.step-inner{grid-template-columns:1fr}}
+
+.formula-box{font-family:var(--font-mono);font-size:10px;background:var(--color-background-tertiary);border-radius:var(--border-radius-md);padding:7px 9px;color:var(--color-text-secondary);line-height:1.8;word-break:break-all;margin-bottom:.6rem}
+.insight-box{font-size:11px;color:var(--color-text-secondary);line-height:1.6;border-left:2px solid var(--color-border-secondary);padding-left:7px;margin-bottom:.6rem}
+.kv{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:.5px solid var(--color-border-tertiary)}
+.kv:last-child{border:none;font-weight:500}
+.kv span:first-child{color:var(--color-text-secondary)}
+
+.totals{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.75rem}
+.tot{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem}
+.tot .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--color-text-tertiary);margin-bottom:4px}
+.tot .val{font-size:20px;font-weight:500;color:var(--color-text-primary)}
+.tot .sub{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}
+</style>
+
+<div class="root">
+
+<div class="top-bar">
+  <span class="top-label">Preset</span>
+  <button class="chip on" onclick="preset('ex3',this)">Ex.3 — Crystal Gold sill</button>
+  <button class="chip" onclick="preset('ex4',this)">Ex.4 — Spoerry nose</button>
+  <button class="chip" onclick="preset('ex2',this)">Ex.2 — ANCM coping</button>
+  <button class="chip" onclick="preset('ex1',this)">Ex.1 — Conway arch</button>
+</div>
+
+<div class="cols">
+
+<div>
+  <div class="card">
+    <div class="sec">Shape type</div>
+    <div class="shape-pick">
+      <div class="sh-btn on" onclick="setShape('rect',this)">
+        <svg width="44" height="30" viewBox="0 0 44 30"><rect x="4" y="5" width="36" height="20" rx="1" fill="none" stroke="var(--color-border-primary)" stroke-width="1.2"/></svg>
+        <span>Rectangular slab</span>
+      </div>
+      <div class="sh-btn" onclick="setShape('chamfer',this)">
+        <svg width="44" height="30" viewBox="0 0 44 30"><path d="M12 5 L40 5 L40 25 L4 25 L4 13 Z" fill="none" stroke="var(--color-border-primary)" stroke-width="1.2"/></svg>
+        <span>Angled step / sill</span>
+      </div>
+      <div class="sh-btn" onclick="setShape('coping',this)">
+        <svg width="44" height="30" viewBox="0 0 44 30"><path d="M4 8 Q22 2 40 8 L40 25 Q22 22 4 25 Z" fill="none" stroke="var(--color-border-primary)" stroke-width="1.2"/></svg>
+        <span>Curved coping</span>
+      </div>
+      <div class="sh-btn" onclick="setShape('profile',this)">
+        <svg width="44" height="30" viewBox="0 0 44 30"><path d="M4 25 L4 12 L14 5 L40 5 L40 25 Z" fill="none" stroke="var(--color-border-primary)" stroke-width="1.2"/></svg>
+        <span>Shaped profile</span>
+      </div>
+    </div>
+
+    <div class="sec">Material</div>
+    <div class="field">
+      <label>Stone family</label>
+      <select id="famille" onchange="calc()"><option value="granit">Granit</option><option value="calcaire">Calcaire</option></select>
+    </div>
+    <div class="field">
+      <label>Surface finish</label>
+      <select id="fini" onchange="calc()">
+        <option value="brule_cg">Brûlé — Crystal Gold (2.50)</option>
+        <option value="brule">Brûlé — other granite (3.50)</option>
+        <option value="jet_sable">Jet de sable (3.50)</option>
+        <option value="meule">Meulé (3.00)</option>
+        <option value="poli_glace">Poli glacé (5.00)</option>
+        <option value="bouchard_gros">Bouchardé gros (5.50)</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Price / pi³  (P)</label>
+      <input type="number" id="P" value="53" step="0.5" oninput="calc()">
+      <div class="hint">$/pi³ from stone supplier</div>
+    </div>
+
+    <div class="sec" style="margin-top:.5rem">Dimensions</div>
+    <div class="r2">
+      <div class="field"><label>B — thickness (in)</label><input type="number" id="B" value="2" step="0.125" oninput="calc()"></div>
+      <div class="field"><label>A — depth (in)</label><input type="number" id="A" value="18.875" step="0.0625" oninput="calc()"></div>
+    </div>
+    <div class="field"><label>C — length (in)</label><input type="number" id="C" value="27.5625" step="0.0625" oninput="calc()"></div>
+
+    <div class="sec" style="margin-top:.5rem">Pricing</div>
+    <div class="field">
+      <label>Client type</label>
+      <select id="client" onchange="calc()">
+        <option value="0.85">Particulier (÷0.85 observed)</option>
+        <option value="0.684">Particulier (÷0.684 official)</option>
+        <option value="0.855">Distributeur (÷0.855)</option>
+        <option value="0.85">Contracteur 5–10k (÷0.85)</option>
+        <option value="0.90">Contracteur &gt;10k (÷0.90)</option>
+      </select>
+    </div>
+    <div class="field"><label>Quantity</label><input type="number" id="QTY" value="4" min="1" step="1" oninput="calc()"></div>
+  </div>
+</div>
+
+<div class="steps-col" id="steps-col"></div>
+
+</div>
+
+<div class="totals">
+  <div class="tot"><div class="lbl">Unit price</div><div class="val" id="t-unit">—</div><div class="sub" id="t-sub">per piece before tax</div></div>
+  <div class="tot"><div class="lbl">Total order</div><div class="val" id="t-total">—</div><div class="sub" id="t-qty">—</div></div>
+</div>
+
+</div>
+
+<script>
+let SHAPE = 'rect';
+
+const PRESETS = {
+  ex3:{B:2,A:18.875,C:27.5625,P:53,famille:'granit',fini:'brule_cg',client:'0.85',QTY:4,shape:'chamfer'},
+  ex4:{B:2,A:11.89,C:39.33,P:44,famille:'granit',fini:'brule_cg',client:'0.85',QTY:1,shape:'coping'},
+  ex2:{B:12,A:22.99,C:86.17,P:24.5,famille:'granit',fini:'brule',client:'0.855',QTY:1,shape:'coping'},
+  ex1:{B:6,A:23.25,C:95.19,P:69.75,famille:'granit',fini:'brule',client:'0.85',QTY:5,shape:'profile'}
+};
+
+const F_TBL={granit:{brule:3.50,brule_cg:2.50,jet_sable:3.50,meule:3.00,poli_glace:5.00,bouchard_gros:5.50},calcaire:{brule:0,brule_cg:0,jet_sable:2.50,meule:0.75,poli_glace:5.00,bouchard_gros:3.50}};
+const PS_TBL={granit:[[2,3.50],[3,3.75],[4.5,4.00],[5.5,4.50],[6.5,5.50],[8,6.00],[10,7.00],[12,7.50],[14,8.00],[16,8.50],[20,9.50],[24,10.50],[28,12.50],[32,14.50],[34,16.50],[36,17.50],[38,18.50],[40,19.50]],calcaire:[[2,2.50],[3,3.00],[4.5,3.50],[5.5,4.00],[6.5,5.00],[8,5.00],[10,6.50],[12,7.00],[14,7.50],[16,8.00],[20,8.50],[24,10.00],[28,12.50],[32,14.00],[34,16.00],[36,17.00],[38,18.00],[40,19.00]]};
+const PASS_TBL=[[1,4.50],[2,5.20],[3,5.70],[4,6.60],[5,7.50],[10,11.20],[15,15.00],[20,18.70],[25,22.40],[30,26.20],[35,30.00],[40,33.75],[45,37.50]];
+
+function lookupPS(f,B){const t=PS_TBL[f];for(let i=0;i<t.length;i++)if(B<=t[i][0])return t[i][1];return t[t.length-1][1];}
+function lookupPass(n){const t=PASS_TBL;if(n<=t[0][0])return t[0][1];for(let i=1;i<t.length;i++){if(n<=t[i][0]){const[n0,c0]=t[i-1],[n1,c1]=t[i];return c0+(n-n0)/(n1-n0)*(c1-c0);}}return t[t.length-1][1];}
+function debitage(f,B){
+  if(B<=1.75)return{flat:true,rate:3.50,label:'flat rate (B≤1¾")'};
+  if(B<=3.5)return{flat:true,rate:4.50,label:'flat rate (2"–3½")'};
+  const inc=f==='granit'?1.25:1.0;
+  const raw=B/inc,p=Math.ceil(raw),rate=lookupPass(p);
+  return{flat:false,inc,raw,p,rate,label:`${n2(raw)} passes → rounded to ${p}`};
+}
+function n2(v,d=2){return parseFloat(v.toFixed(d)).toString();}
+function $$(v){return '$'+v.toFixed(2);}
+
+function setShape(s,el){
+  SHAPE=s;
+  document.querySelectorAll('.sh-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  calc();
+}
+
+function preset(k,el){
+  const p=PRESETS[k];
+  document.getElementById('B').value=p.B;
+  document.getElementById('A').value=p.A;
+  document.getElementById('C').value=p.C;
+  document.getElementById('P').value=p.P;
+  document.getElementById('famille').value=p.famille;
+  document.getElementById('fini').value=p.fini;
+  document.getElementById('client').value=p.client;
+  document.getElementById('QTY').value=p.QTY;
+  SHAPE=p.shape;
+  document.querySelectorAll('.sh-btn').forEach(b=>b.classList.remove('on'));
+  const shapeLabels={rect:'Rectangular slab',chamfer:'Angled step / sill',coping:'Curved coping',profile:'Shaped profile'};
+  document.querySelectorAll('.sh-btn').forEach(b=>{if(b.querySelector('span').textContent===shapeLabels[p.shape])b.classList.add('on');});
+  document.querySelectorAll('.chip').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  calc();
+}
+
+function toggle(el){el.closest('.step-card').classList.toggle('open');}
+
+function makeStep(idx,name,result,formulaLines,insight,kvs,diagFn){
+  const id='step-'+idx;
+  const div=document.createElement('div');
+  div.className='step-card'+(idx===0?' open':'');
+  div.innerHTML=`
+    <div class="step-head" onclick="this.closest('.step-card').classList.toggle('open')">
+      <div class="step-idx">${idx+1}</div>
+      <div class="step-name">${name}</div>
+      <div class="step-result">${result}</div>
+    </div>
+    <div class="step-body">
+      <div class="step-inner">
+        <div>
+          <div class="formula-box">${formulaLines}</div>
+          <div class="insight-box">${insight}</div>
+          ${kvs.map(([k,v])=>`<div class="kv"><span>${k}</span><span>${v}</span></div>`).join('')}
+        </div>
+        <div id="${id}-diag"></div>
+      </div>
+    </div>`;
+  return {el:div,diagId:id+'-diag',diagFn};
+}
+
+function svgWrap(content,h=140){
+  return `<svg width="100%" viewBox="0 0 260 ${h}" xmlns="http://www.w3.org/2000/svg"
+    style="display:block;margin-top:4px">
+    <defs><marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+    <path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>
+    ${content}</svg>`;
+}
+
+function txt(x,y,s,anchor='middle',cls='',extra=''){
+  const fill=cls==='sec'?'var(--color-text-tertiary)':cls==='hi'?'var(--color-text-info)':cls==='warn'?'#E8593C':'var(--color-text-secondary)';
+  const fs=cls==='big'?13:10;
+  return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${fs}" fill="${fill}" font-family="var(--font-sans)" ${extra}>${s}</text>`;
+}
+
+function calc(){
+  const B=parseFloat(document.getElementById('B').value)||0;
+  const A=parseFloat(document.getElementById('A').value)||0;
+  const C=parseFloat(document.getElementById('C').value)||0;
+  const P=parseFloat(document.getElementById('P').value)||0;
+  const famille=document.getElementById('famille').value;
+  const fini=document.getElementById('fini').value;
+  const gamma=parseFloat(document.getElementById('client').value)||0.85;
+  const QTY=parseInt(document.getElementById('QTY').value)||1;
+
+  const delta=0.25,dB=0.5,alpha=0.85,b1=0.95,b2=0.90;
+  const K=12+delta,eta=Math.pow(K/12,2);
+  const F=F_TBL[famille]?.[fini]??0;
+  const MP=P*(B+dB)/12*eta;
+  const deb=debitage(famille,B);
+  const GS=deb.rate;
+  const PS=lookupPS(famille,B);
+  const raw=MP+GS+PS+F;
+  const Base=raw/alpha;
+
+  const A_b=A+delta, C_b=C+1.0;
+  const S=(A_b/12)*(C_b/12);
+  const Cost=S*Base;
+  const unit=Cost/gamma;
+  const total=unit*QTY;
+
+  document.getElementById('t-unit').textContent=$$(unit);
+  document.getElementById('t-total').textContent=$$(total);
+  document.getElementById('t-qty').textContent=`${QTY} × ${$$(unit)}`;
+
+  const steps=[];
+
+  // ── STEP 1 : MP ──────────────────────────────────────────────────────────
+  steps.push(makeStep(0,'MP — material cost per pi²',$$(MP)+'/pi²',
+    `MP = P × (B + ΔB) / 12 × η\n   = ${n2(P)} × (${n2(B)} + ${dB}) / 12 × ${n2(eta,4)}\n   = ${$$(MP)}/pi²`,
+    `You buy stone at ${$$(P)}/pi³. Each pi² of face requires <b>${n2((B+dB)/12,4)} pi</b> of thickness (B plus the ΔB=½" calibration allowance). The η factor adds <b>${n2((eta-1)*100,1)}%</b> for blade kerf waste in both planar directions.`,
+    [['P (stone price)',$$(P)+'/pi³'],['B + ΔB',n2(B+dB,3)+'" = '+n2((B+dB)/12,4)+' pi'],['η (kerf area factor)',n2(eta,4)],['→ MP',$$(MP)+'/pi²']],
+    ()=>{
+      // 3D brick diagram showing B, delta, kerf loss
+      const bx=40,by=30,bw=140,bh=60;
+      const dw=Math.min(bw*0.12,14);
+      return svgWrap(`
+        ${txt(130,15,'Stone block cross-section','middle','sec')}
+        <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="var(--color-background-secondary)" stroke="var(--color-border-primary)" stroke-width="1"/>
+        <rect x="${bx}" y="${by}" width="${dw}" height="${bh}" fill="var(--color-background-tertiary)" stroke="none" opacity=".6"/>
+        <line x1="${bx+dw}" y1="${by}" x2="${bx+dw}" y2="${by+bh}" stroke="#E8593C" stroke-width=".8" stroke-dasharray="3 2"/>
+        ${txt(bx+dw/2,by+bh+12,'δ=¼"','middle','warn')}
+        ${txt(bx+dw+(bw-dw)/2,by+bh+12,'B + ΔB = '+n2(B+dB,2)+'"','middle','sec')}
+        <line x1="${bx}" y1="${by+bh+22}" x2="${bx+dw}" y2="${by+bh+22}" stroke="#E8593C" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>
+        <line x1="${bx+dw}" y1="${by+bh+22}" x2="${bx+bw}" y2="${by+bh+22}" stroke="var(--color-border-primary)" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>
+        ${txt(bx+bw+8,by+bh/2,'face','start','sec')}
+        ${txt(bx+bw+8,by+bh/2+12,'(pi²)','start','sec')}
+        <path d="M${bx+bw} ${by} L${bx+bw+28} ${by-8} L${bx+bw+28+12} ${by-8+bh*0.5}" fill="none" stroke="var(--color-border-secondary)" stroke-width=".8" stroke-dasharray="2 2"/>
+        <path d="M${bx+bw} ${by+bh} L${bx+bw+28} ${by-8+bh} L${bx+bw+28+12} ${by-8+bh*0.5+bh*0.5}" fill="none" stroke="var(--color-border-secondary)" stroke-width=".8" stroke-dasharray="2 2"/>
+        <path d="M${bx+bw+28} ${by-8} L${bx+bw+28} ${by-8+bh}" fill="none" stroke="var(--color-border-secondary)" stroke-width=".8" stroke-dasharray="2 2"/>
+      `,110);
+    }
+  ));
+
+  // ── STEP 2 : GS ──────────────────────────────────────────────────────────
+  steps.push(makeStep(1,'GS — débitage (trimming cuts)',$$(GS)+'/pi²',
+    deb.flat
+      ? `B = ${n2(B)}" → flat rate bracket\nGS = ${$$(GS)}/pi²`
+      : `inc = ${n2(deb.inc,2)}"/pass  (granit débitage)\npasses = ${n2(B)}" ÷ ${n2(deb.inc,2)} = ${n2(deb.raw,2)}\n→ round up to ${deb.p} passes\nGS = lookup(${deb.p}) = ${$$(GS)}/pi²`,
+    deb.flat
+      ? `B=${n2(B)}" falls in the flat-rate bracket. No pass count needed.`
+      : `The blade removes <b>${n2(deb.inc,2)}" of ${famille} per pass</b>. For B=${n2(B)}", that's ${n2(deb.raw,2)} traversals — rounded up to <b>${deb.p} passes</b>. More passes = more machine time = higher cost.`,
+    deb.flat
+      ? [['Bracket','B ≤ 3½"'],['→ GS (flat)',$$(GS)+'/pi²']]
+      : [['Inches per pass',n2(deb.inc,2)+'"'],['Raw passes',n2(deb.raw,2)],['Rounded up',deb.p+' passes'],['→ GS',$$(GS)+'/pi²']],
+    ()=>{
+      // Side-view of blade making N passes through B
+      const passes=deb.flat?1:Math.min(deb.p,10);
+      const sw=180,sh=60,sx=40,sy=35;
+      const passH=sh/(passes+1);
+      let lines='';
+      for(let i=1;i<=passes;i++){
+        const py=sy+i*passH;
+        const col=i===passes?'#E8593C':'var(--color-border-secondary)';
+        lines+=`<line x1="${sx}" y1="${py}" x2="${sx+sw}" y2="${py}" stroke="${col}" stroke-width="${i===passes?1.2:.6}" stroke-dasharray="${i===passes?'none':'4 2'}"/>`;
+      }
+      return svgWrap(`
+        ${txt(130,16,'Blade passes through thickness','middle','sec')}
+        <rect x="${sx}" y="${sy}" width="${sw}" height="${sh}" fill="var(--color-background-secondary)" stroke="var(--color-border-primary)" stroke-width="1"/>
+        ${lines}
+        <line x1="${sx-12}" y1="${sy}" x2="${sx-12}" y2="${sy+sh}" stroke="var(--color-border-secondary)" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>
+        ${txt(sx-20,sy+sh/2,'B='+n2(B)+'"','middle','sec','transform="rotate(-90,'+(sx-20)+','+(sy+sh/2)+')"')}
+        ${txt(sx+sw+5,sy+passes*passH,'pass ${deb.flat?1:deb.p}','start','warn')}
+        ${txt(130,sy+sh+18,deb.flat?'flat rate — no pass count':'${deb.p} passes → ${$$(GS)}/pi²','middle','sec')}
+      `,105);
+    }
+  ));
+
+  // ── STEP 3 : PS ──────────────────────────────────────────────────────────
+  steps.push(makeStep(2,'PS — sciage primaire (primary cut)',$$(PS)+'/pi²',
+    `PS = lookup_PS(${famille}, B=${n2(B)}")\n   = ${$$(PS)}/pi²`,
+    `The cost to slice a quarry block into slabs. Read directly from the bracket table by material and thickness. Granit costs more than calcaire because the blade moves slower through harder stone.`,
+    [['Material',famille],['B bracket',n2(B)+'\"'],['→ PS',$$(PS)+'/pi²']],
+    ()=>{
+      // Table excerpt highlighting the matching row
+      const tbl=PS_TBL[famille];
+      let rows='',ry=32;
+      const labels=['1"–2"','2¼"–3"','3½"–4½"','4½"–5½"','5½"–6½"','6½"–8"','8"–10"','10"–12"'];
+      for(let i=0;i<Math.min(tbl.length,8);i++){
+        const matched=B<=tbl[i][0]&&(i===0||B>tbl[i-1][0]);
+        const fill=matched?'var(--color-background-info)':'none';
+        const tc=matched?'var(--color-text-info)':'var(--color-text-secondary)';
+        rows+=`<rect x="30" y="${ry-10}" width="200" height="16" fill="${fill}" rx="2"/>`;
+        rows+=`<text x="34" y="${ry}" font-size="9.5" fill="${tc}" font-family="var(--font-sans)">${labels[i]||tbl[i][0]+'"'}</text>`;
+        rows+=`<text x="228" y="${ry}" text-anchor="end" font-size="9.5" fill="${tc}" font-family="var(--font-sans)">${$$(tbl[i][1])}</text>`;
+        ry+=18;
+      }
+      return svgWrap(`
+        ${txt(130,16,'PS table (${famille})','middle','sec')}
+        ${txt(34,28,'Bracket','start','sec')}${txt(228,28,'$/pi²','end','sec')}
+        <line x1="30" y1="30" x2="230" y2="30" stroke="var(--color-border-tertiary)" stroke-width=".5"/>
+        ${rows}
+      `,ry+8);
+    }
+  ));
+
+  // ── STEP 4 : F ───────────────────────────────────────────────────────────
+  steps.push(makeStep(3,'F — surface finish',$$(F)+'/pi²',
+    `F = lookup_F(${famille}, ${fini})\n  = ${$$(F)}/pi²`,
+    `Applied to every pi² of visible face. Harder processes (piqué, éclaté) cost more. Granit resists more than calcaire so rates are higher.`,
+    [['Material',famille],['Finish',fini],['→ F',$$(F)+'/pi²']],
+    ()=>{
+      const finishes=[['Meulé',3.00],['Jet de sable',3.50],['Brûlé',3.50],['Poli mat',4.50],['Poli glacé',5.00],['Bouchardé gros',5.50],['Éclaté',18.00]];
+      const maxV=18,barW=130;
+      let bars='',by=30;
+      finishes.forEach(([nm,v])=>{
+        const w=v/maxV*barW;
+        const isCur=(Math.abs(v-F)<0.01&&(nm.toLowerCase().includes('brûl')===fini.includes('brule')||v===F));
+        const col=isCur?'var(--color-background-info)':'var(--color-background-tertiary)';
+        const tc=isCur?'var(--color-text-info)':'var(--color-text-secondary)';
+        bars+=`<rect x="90" y="${by-9}" width="${w}" height="12" fill="${col}" rx="2"/>`;
+        bars+=`<text x="86" y="${by}" text-anchor="end" font-size="9" fill="${tc}" font-family="var(--font-sans)">${nm}</text>`;
+        bars+=`<text x="${90+w+4}" y="${by}" font-size="9" fill="${tc}" font-family="var(--font-sans)">${$$(v)}</text>`;
+        by+=18;
+      });
+      return svgWrap(`${txt(130,16,'Finish rates — '+famille,'middle','sec')}${bars}`,by+4);
+    }
+  ));
+
+  // ── STEP 5 : BASE ────────────────────────────────────────────────────────
+  steps.push(makeStep(4,'Base rate — assembled pi² cost',$$(Base)+'/pi²',
+    `Base = (MP + GS + PS + F) / α\n     = (${n2(MP,2)} + ${n2(GS,2)} + ${n2(PS,2)} + ${n2(F,2)}) / ${alpha}\n     = ${n2(raw,2)} / ${alpha}\n     = ${$$(Base)}/pi²`,
+    `Sum the four costs, then divide by α=0.85. Dividing by 0.85 = multiplying by ${n2(1/alpha,3)} — adding <b>${n2((1/alpha-1)*100,1)}% overhead</b>. This embeds the first two client cascade steps (÷0.95 × ÷0.90 ≈ ÷0.855).`,
+    [['MP + GS + PS + F',n2(raw,2)+'/pi²'],['÷ α (0.85)','+'+n2((1/alpha-1)*100,1)+'%'],['→ Base',$$(Base)+'/pi²']],
+    ()=>{
+      // Stacked bar: MP GS PS F then /alpha stretch
+      const total=raw,bw=160,bh=22,bx=20,by=40;
+      const comps=[['MP',MP,'#3B8BD4'],['GS',GS,'#1D9E75'],['PS',PS,'#BA7517'],['F',F,'#993556']];
+      let cx=bx,bars='',lbls='';
+      comps.forEach(([lbl,v,col])=>{
+        const w=v/total*bw;
+        bars+=`<rect x="${cx}" y="${by}" width="${w}" height="${bh}" fill="${col}" opacity=".7"/>`;
+        if(w>18)lbls+=`<text x="${cx+w/2}" y="${by+bh/2+4}" text-anchor="middle" font-size="8.5" fill="#fff" font-family="var(--font-sans)">${lbl}</text>`;
+        cx+=w;
+      });
+      const stretchedW=bw/alpha;
+      return svgWrap(`
+        ${txt(130,16,'Stacked cost components','middle','sec')}
+        ${bars}${lbls}
+        <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="none" stroke="var(--color-border-primary)" stroke-width=".5"/>
+        ${txt(bx+bw/2,by+bh+12,n2(raw,2)+'/pi²','middle','sec')}
+        <line x1="${bx}" y1="${by+bh+22}" x2="${bx+stretchedW}" y2="${by+bh+22}" stroke="#E8593C" stroke-width=".75" marker-end="url(#arr)"/>
+        <rect x="${bx}" y="${by+bh+28}" width="${stretchedW}" height="${bh}" fill="#E8593C" opacity=".15" stroke="#E8593C" stroke-width=".5" stroke-dasharray="3 2"/>
+        ${txt(bx+stretchedW/2,by+bh+28+bh/2+4,'Base = '+$$(Base)+'/pi²','middle','warn')}
+        ${txt(bx+bw+4,by+bh+22,'÷ α','start','warn')}
+      `,by+bh+28+bh+16);
+    }
+  ));
+
+  // ── STEP 6 : BOUNDING BOX ────────────────────────────────────────────────
+  steps.push(makeStep(5,'Bounding box — piece cost',$$(Cost),
+    `A_brut = ${n2(A)}" + δ(${delta}") = ${n2(A_b,3)}"\nC_brut = ${n2(C)}" + 1.0" = ${n2(C_b,3)}"\nS = (${n2(A_b,3)}/12) × (${n2(C_b,3)}/12) = ${n2(S,3)} pi²\nCost = ${n2(S,3)} × ${$$(Base)} = ${$$(Cost)}`,
+    `The piece is always priced from a <b>bounding rectangle</b>. You buy the whole block; waste carved away is the cost of the shape. A gets a ${delta}" blade-kerf allowance; C gets 1.0" entry/exit allowance.`,
+    [['A_brut',n2(A_b,3)+'"'],['C_brut',n2(C_b,3)+'"'],['S',n2(S,3)+' pi²'],['× Base',$$(Base)+'/pi²'],['→ Cost_brut',$$(Cost)]],
+    ()=> diagBBox(A,C,A_b,C_b,SHAPE)
+  ));
+
+  // ── STEP 7 : FINAL ───────────────────────────────────────────────────────
+  steps.push(makeStep(6,'Final price — client markup',$$(unit)+'/piece',
+    `ST = ${$$(Cost)}\nPrice = ST / γ = ${$$(Cost)} / ${gamma}\n     = ${$$(unit)}/piece\nTotal = ${$$(unit)} × ${QTY} = ${$$(total)}`,
+    `Dividing by γ=${gamma} adds <b>${n2((1/gamma-1)*100,1)}% margin</b> for client type. The official Particulier cascade (÷0.95÷0.90÷0.80) = ÷0.684 = +46%, but ÷0.85 is observed in practice.`,
+    [['Subtotal ST',$$(Cost)],['÷ γ ('+gamma+')','+'+n2((1/gamma-1)*100,1)+'%'],['→ Unit price',$$(unit)],['× QTY ('+QTY+')',$$(total)+' total']],
+    ()=>{
+      // Price cascade bar
+      const steps2=[['Cost',Cost],['÷0.85→',unit]];
+      const maxV=unit*1.05,bw=180;
+      let by=32,out='';
+      steps2.forEach(([lbl,v],i)=>{
+        const w=v/maxV*bw;
+        const col=i===0?'var(--color-background-tertiary)':'#E8593C';
+        const opacity=i===0?'1':'0.2';
+        out+=`<rect x="60" y="${by-12}" width="${w}" height="16" fill="${col}" opacity="${opacity}" rx="2"/>`;
+        out+=`<text x="56" y="${by}" text-anchor="end" font-size="9.5" fill="var(--color-text-secondary)" font-family="var(--font-sans)">${lbl}</text>`;
+        out+=`<text x="${60+w+4}" y="${by}" font-size="9.5" fill="${i===1?'#E8593C':'var(--color-text-secondary)'}" font-family="var(--font-sans)">${$$(v)}</text>`;
+        by+=26;
+      });
+      out+=`${txt(130,by+4,'÷γ = ×'+n2(1/gamma,3)+' (+'+n2((1/gamma-1)*100,1)+'%)','middle','warn')}`;
+      out+=`${txt(130,by+18,'× '+QTY+' pieces = '+$$(total),'middle','sec')}`;
+      return svgWrap(out,by+30);
+    }
+  ));
+
+  const col=document.getElementById('steps-col');
+  col.innerHTML='';
+  const pending=[];
+  steps.forEach(s=>{col.appendChild(s.el);pending.push(s);});
+  pending.forEach(s=>{
+    const el=document.getElementById(s.diagId);
+    if(el)el.innerHTML=s.diagFn();
+  });
+}
+
+function diagBBox(A,C,A_b,C_b,shape){
+  const pw=180,ph=110,ox=40,oy=20;
+  const sc=Math.min(pw/(C_b||1),ph/(A_b||1));
+  const bw=C_b*sc,bh=A_b*sc;
+  const nw=C*sc,nh=A*sc;
+  const bx=ox,by=oy;
+  const nx=bx+((C_b-C)/2)*sc,ny=by+((A_b-A)/2)*sc;
+
+  let netPath,wastePaths='';
+  if(shape==='rect'){
+    netPath=`M${nx} ${ny} L${nx+nw} ${ny} L${nx+nw} ${ny+nh} L${nx} ${ny+nh} Z`;
+  } else if(shape==='chamfer'){
+    const ch=Math.min(nh*0.35,nw*0.25);
+    netPath=`M${nx+ch} ${ny} L${nx+nw} ${ny} L${nx+nw} ${ny+nh} L${nx} ${ny+nh} L${nx} ${ny+ch} Z`;
+    wastePaths=`<path d="M${nx} ${ny} L${nx+ch} ${ny} L${nx} ${ny+ch} Z" fill="var(--color-background-tertiary)" opacity=".5"/>`;
+  } else if(shape==='coping'){
+    const cy1=ny+nh*0.22,cy2=ny+nh*0.22;
+    netPath=`M${nx} ${ny+nh*0.25} Q${nx+nw/2} ${ny} ${nx+nw} ${ny+nh*0.25} L${nx+nw} ${ny+nh*0.75} Q${nx+nw/2} ${ny+nh} ${nx} ${ny+nh*0.75} Z`;
+    wastePaths=`
+      <path d="M${bx} ${by} L${bx+bw} ${by} L${nx+nw} ${ny+nh*0.25} Q${nx+nw/2} ${ny} ${nx} ${ny+nh*0.25} Z" fill="var(--color-background-tertiary)" opacity=".45"/>
+      <path d="M${bx} ${by+bh} L${bx+bw} ${by+bh} L${nx+nw} ${ny+nh*0.75} Q${nx+nw/2} ${ny+nh} ${nx} ${ny+nh*0.75} Z" fill="var(--color-background-tertiary)" opacity=".45"/>`;
+  } else {
+    const tapX=nw*0.18;
+    netPath=`M${nx+tapX} ${ny} L${nx+nw} ${ny} L${nx+nw} ${ny+nh} L${nx} ${ny+nh} L${nx} ${ny+nh*0.45} Z`;
+    wastePaths=`<path d="M${nx} ${ny} L${nx+tapX} ${ny} L${nx} ${ny+nh*0.45} Z" fill="var(--color-background-tertiary)" opacity=".5"/>`;
+  }
+
+  const h=Math.max(oy+bh+48,120);
+  return svgWrap(`
+    <rect x="${bx}" y="${by}" width="${bw}" height="${bh}" fill="none" stroke="#E8593C" stroke-width=".75" stroke-dasharray="3 2" rx="1"/>
+    ${wastePaths}
+    <path d="${netPath}" fill="var(--color-background-secondary)" stroke="var(--color-border-primary)" stroke-width="1"/>
+    <line x1="${bx}" y1="${by+bh+12}" x2="${bx+bw}" y2="${by+bh+12}" stroke="#3B8BD4" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    ${txt(bx+bw/2,by+bh+22,'C_brut = '+n2(C_b,2)+'"','middle','hi')}
+    <line x1="${bx+bw+14}" y1="${by}" x2="${bx+bw+14}" y2="${by+bh}" stroke="#3B8BD4" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>
+    ${txt(bx+bw+18,by+bh/2,'A_brut','start','hi')}
+    ${txt(bx+bw+18,by+bh/2+11,n2(A_b,2)+'"','start','hi')}
+    ${txt(bx+bw/2,by+bh+36,'You pay for the whole dashed box','middle','sec')}
+  `,h);
+}
+
+calc();
+</script>
