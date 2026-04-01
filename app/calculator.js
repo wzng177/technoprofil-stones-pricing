@@ -135,8 +135,8 @@ function diagMP(r) {
     + tx(bx + dw + (bw - dw) / 2, by + bh + 24, `B+ΔB=${nd(B + dB, 2)}"`, 'middle', C_DIM)
     + `<line x1="${bx+bw+12}" y1="${by}" x2="${bx+bw+12}" y2="${by+bh}" stroke="#bbb" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>`
     + tx(bx + bw + 18, by + bh / 2 - 5, '1 pi² face', 'start', C_MUTED, 9)
-    + tx(196, by + bh / 2, `P=${$d(P)}/pi³`, 'start', C_MUTED, 9)
-    + tx(196, by + bh / 2 + 13, `→ ${$d(MP)}/pi²`, 'start', C_OK, 9)
+    + tx(196, by + bh / 1.5 + 13, `P=${$d(P)}/pi³`, 'start', C_MUTED, 9)
+    + tx(196, by + bh / 1 + 13, `→ ${$d(MP)}/pi²`, 'start', C_OK, 9)
   , 110);
 }
 
