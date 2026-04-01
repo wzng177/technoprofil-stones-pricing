@@ -1,0 +1,447 @@
+/* ─────────────────────────────────────────────────────────────
+   TECHNOPROFIL — Stylesheet
+   Design: industrial/precision tool, warm stone palette
+   Font: IBM Plex Mono (monospace) + IBM Plex Sans
+   ───────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap');
+
+/* ── Tokens ──────────────────────────────────────────────────── */
+:root {
+  --stone:       #f5f1ea;
+  --stone-mid:   #ede8df;
+  --stone-deep:  #e0d8cb;
+  --ink:         #1a1714;
+  --ink-mid:     #3d3830;
+  --ink-light:   #7a7268;
+  --ink-ghost:   #a89e93;
+  --rule:        #d4ccbf;
+  --rule-light:  #e8e2d8;
+
+  --accent:      #c8490d;    /* terracotta — warning / highlight */
+  --accent-soft: #f5e8e2;
+  --blue:        #2b6cb0;
+  --blue-soft:   #deeaf7;
+  --green:       #1a7a53;
+  --green-soft:  #d8f0e6;
+  --amber:       #9a5c00;
+  --amber-soft:  #fdf0d5;
+
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   10px;
+
+  --mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+
+  --shadow-card: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+}
+
+/* ── Reset & base ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 14px; }
+
+body {
+  font-family: var(--sans);
+  font-size: 13px;
+  background: var(--stone);
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 0;
+}
+
+input, select, button, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input[type="number"], input[type="text"], select {
+  width: 100%;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  color: var(--ink);
+  padding: 5px 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  transition: border-color .15s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+input[type="number"]:focus, input[type="text"]:focus, select:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237a7268'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
+/* ── App shell ───────────────────────────────────────────────── */
+#app {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.app-header {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--rule);
+}
+.app-title {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+.app-subtitle {
+  font-size: 11px;
+  color: var(--ink-ghost);
+  letter-spacing: .04em;
+}
+
+/* ── Preset bar ──────────────────────────────────────────────── */
+.top-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.top-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-ghost);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-right: 2px;
+}
+.chip {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  color: var(--ink-light);
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.chip:hover { border-color: var(--ink-light); color: var(--ink); }
+.chip.on {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+/* ── Two-column layout ───────────────────────────────────────── */
+.cols {
+  display: grid;
+  grid-template-columns: 228px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 640px) { .cols { grid-template-columns: 1fr; } }
+
+/* ── Panel cards ─────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  padding: 14px 14px 12px;
+  box-shadow: var(--shadow-card);
+}
+.card + .card { margin-top: 10px; }
+
+.sec {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-ghost);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+/* ── Form fields ─────────────────────────────────────────────── */
+.field { margin-bottom: 8px; }
+.field label {
+  display: block;
+  font-size: 11px;
+  color: var(--ink-light);
+  margin-bottom: 3px;
+}
+.hint {
+  font-size: 10px;
+  color: var(--ink-ghost);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.r2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+
+/* ── Shape picker ────────────────────────────────────────────── */
+.shape-pick {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.sh-btn {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  padding: 7px 4px 6px;
+  cursor: pointer;
+  text-align: center;
+  background: var(--stone-mid);
+  transition: all .15s;
+}
+.sh-btn:hover { border-color: var(--ink-light); background: var(--stone-deep); }
+.sh-btn.on {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+.sh-btn svg { display: block; margin: 0 auto 4px; }
+.sh-btn span {
+  font-size: 10px;
+  color: var(--ink-light);
+  line-height: 1.3;
+  display: block;
+}
+.sh-btn.on span { color: var(--blue); }
+
+/* ── Toggle switch ───────────────────────────────────────────── */
+.tog-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 11px;
+  color: var(--ink-light);
+}
+.tog-track {
+  position: relative;
+  width: 30px; height: 17px;
+  background: var(--rule);
+  border-radius: 9px;
+  display: inline-block;
+  cursor: pointer;
+  transition: background .2s;
+  flex-shrink: 0;
+}
+.tog-track:has(input:checked) { background: var(--blue); }
+.tog-thumb {
+  position: absolute;
+  top: 2.5px; left: 2.5px;
+  width: 12px; height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform .18s;
+  pointer-events: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,.2);
+}
+.tog-input {
+  position: absolute;
+  opacity: 0; width: 100%; height: 100%;
+  cursor: pointer; margin: 0;
+}
+.tog-input:checked ~ .tog-thumb { transform: translateX(13px); }
+
+/* ── m_ext mode toggle ───────────────────────────────────────── */
+.mext-toggle {
+  display: flex;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.mext-opt {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 6px 4px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--stone-mid);
+  color: var(--ink-light);
+  border: none;
+  transition: all .15s;
+  line-height: 1.4;
+}
+.mext-opt + .mext-opt { border-left: 1px solid var(--rule); }
+.mext-opt:hover { background: var(--stone-deep); }
+.mext-opt.on { background: var(--amber-soft); color: var(--amber); font-weight: 500; }
+
+/* ── Steps column ────────────────────────────────────────────── */
+.steps-col { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Step card ───────────────────────────────────────────────── */
+.step-card {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #fff;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow .15s;
+}
+.step-card:hover { box-shadow: 0 2px 6px rgba(0,0,0,.08); }
+
+.step-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--stone);
+  border-bottom: 1px solid transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: background .12s;
+}
+.step-card.open .step-head {
+  border-bottom-color: var(--rule-light);
+  background: var(--stone-mid);
+}
+.step-head:hover { background: var(--stone-deep); }
+
+.step-idx {
+  font-family: var(--mono);
+  font-size: 9px;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-ghost);
+  flex-shrink: 0;
+}
+.step-name {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-mid);
+}
+.step-result {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.step-badge {
+  font-family: var(--mono);
+  font-size: 8px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  background: var(--amber-soft);
+  color: var(--amber);
+  margin-left: 6px;
+  font-weight: 400;
+  letter-spacing: .03em;
+}
+
+.step-body { display: none; padding: 14px; }
+.step-card.open .step-body { display: block; }
+
+.step-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 520px) { .step-inner { grid-template-columns: 1fr; } }
+
+/* ── Formula box ─────────────────────────────────────────────── */
+.formula-box {
+  font-family: var(--mono);
+  font-size: 10px;
+  background: var(--stone);
+  border: 1px solid var(--rule-light);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  color: var(--ink-mid);
+  line-height: 2;
+  white-space: pre;
+  overflow-x: auto;
+  margin-bottom: 8px;
+}
+
+/* ── Insight text ────────────────────────────────────────────── */
+.insight-box {
+  font-size: 11px;
+  color: var(--ink-light);
+  line-height: 1.65;
+  border-left: 2px solid var(--rule);
+  padding-left: 8px;
+  margin-bottom: 8px;
+}
+
+/* ── Key-value rows ──────────────────────────────────────────── */
+.kv {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--rule-light);
+}
+.kv:last-child { border: none; font-weight: 500; }
+.kv span:first-child { color: var(--ink-light); }
+.kv.warn span:last-child { color: var(--amber); }
+
+/* ── Totals bar ──────────────────────────────────────────────── */
+.totals {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+@media (max-width: 500px) { .totals { grid-template-columns: 1fr 1fr; } }
+
+.tot {
+  background: #fff;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  box-shadow: var(--shadow-card);
+}
+.tot .lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-ghost);
+  margin-bottom: 4px;
+}
+.tot .val {
+  font-family: var(--mono);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -.01em;
+}
+.tot:last-child .val { color: var(--accent); }
+.tot .sub {
+  font-size: 10px;
+  color: var(--ink-ghost);
+  margin-top: 3px;
+}
+
+/* ── Brûlage sub-fields ──────────────────────────────────────── */
+#brulage-fields {
+  background: var(--stone-mid);
+  border: 1px solid var(--rule-light);
+  border-radius: var(--radius-md);
+  padding: 8px 10px;
+  margin-bottom: 6px;
+}

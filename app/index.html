@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Technoprofil — Estimateur</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <span class="app-title">Technoprofil</span>
+    <span class="app-subtitle">Estimateur de coût — pierre naturelle</span>
+  </header>
+
+  <!-- Preset chips -->
+  <div class="top-bar">
+    <span class="top-label">Preset</span>
+    <button class="chip on"  onclick="applyPreset('ex3', this)">Ex.3 — Crystal Gold sill</button>
+    <button class="chip"     onclick="applyPreset('ex4', this)">Ex.4 — Spoerry nose</button>
+    <button class="chip"     onclick="applyPreset('ex2', this)">Ex.2 — ANCM coping</button>
+    <button class="chip"     onclick="applyPreset('ex1', this)">Ex.1 — Conway arch</button>
+  </div>
+
+  <!-- Main columns -->
+  <div class="cols">
+
+    <!-- ── Left panel: inputs ── -->
+    <div>
+      <div class="card">
+
+        <!-- Shape -->
+        <div class="sec">Shape</div>
+        <div class="shape-pick">
+          <div class="sh-btn" onclick="setShape('rect', this)">
+            <svg width="44" height="28" viewBox="0 0 44 28">
+              <rect x="4" y="4" width="36" height="20" rx="1" fill="none" stroke="#4A90D9" stroke-width="1.2"/>
+            </svg>
+            <span>Rectangular slab</span>
+          </div>
+          <div class="sh-btn on" onclick="setShape('chamfer', this)">
+            <svg width="44" height="28" viewBox="0 0 44 28">
+              <path d="M12 4 L40 4 L40 24 L4 24 L4 12 Z" fill="none" stroke="#4A90D9" stroke-width="1.2"/>
+            </svg>
+            <span>Angled step / sill</span>
+          </div>
+          <div class="sh-btn" onclick="setShape('coping', this)">
+            <svg width="44" height="28" viewBox="0 0 44 28">
+              <path d="M4 8 Q22 2 40 8 L40 22 Q22 26 4 22 Z" fill="none" stroke="#4A90D9" stroke-width="1.2"/>
+            </svg>
+            <span>Curved coping</span>
+          </div>
+          <div class="sh-btn" onclick="setShape('profile', this)">
+            <svg width="44" height="28" viewBox="0 0 44 28">
+              <path d="M4 24 L4 12 L14 4 L40 4 L40 24 Z" fill="none" stroke="#4A90D9" stroke-width="1.2"/>
+            </svg>
+            <span>Shaped profile</span>
+          </div>
+        </div>
+
+        <!-- Material -->
+        <div class="sec">Material</div>
+        <div class="field">
+          <label>Stone family</label>
+          <select id="famille" onchange="render()">
+            <option value="granit">Granit</option>
+            <option value="calcaire">Calcaire</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Surface finish</label>
+          <select id="fini" onchange="render()">
+            <!-- populated from FINISH_OPTIONS in tables.js -->
+          </select>
+        </div>
+        <div class="field">
+          <label>Price / pi³ (P)</label>
+          <input type="number" id="P" value="53" step="0.5" oninput="render()">
+          <div class="hint">$/pi³ — from supplier</div>
+        </div>
+
+        <!-- Dimensions -->
+        <div class="sec" style="margin-top:6px">Dimensions</div>
+        <div class="r2">
+          <div class="field">
+            <label>B — thickness (in)</label>
+            <input type="number" id="B" value="2" step="0.125" oninput="render()">
+          </div>
+          <div class="field">
+            <label>A — depth (in)</label>
+            <input type="number" id="A" value="18.875" step="0.0625" oninput="render()">
+          </div>
+        </div>
+        <div class="field">
+          <label>C — length (in)</label>
+          <input type="number" id="C" value="27.5625" step="0.0625" oninput="render()">
+        </div>
+
+        <!-- Machining -->
+        <div class="sec" style="margin-top:6px">Machining</div>
+        <div class="tog-row">
+          <span>Angle cut (45° chamfer)</span>
+          <label class="tog-track">
+            <input class="tog-input" type="checkbox" id="hasAngle" checked onchange="render()">
+            <span class="tog-thumb"></span>
+          </label>
+        </div>
+        <div id="mext-pick" class="mext-toggle">
+          <button class="mext-opt" data-mext="official" onclick="setMext('official', this)">Official table<br>m_ext=1.0</button>
+          <button class="mext-opt on" data-mext="observed" onclick="setMext('observed', this)">Observed ×1.25²<br>matches Ex.3</button>
+        </div>
+        <div class="tog-row" style="margin-top:6px">
+          <span>Brûlage service</span>
+          <label class="tog-track">
+            <input class="tog-input" type="checkbox" id="hasBrulage" onchange="toggleBrulage(this)">
+            <span class="tog-thumb"></span>
+          </label>
+        </div>
+        <div id="brulage-fields" style="display:none">
+          <div class="field">
+            <label>Rate ($/pi.lin)</label>
+            <input type="number" id="brulRate" value="3.00" step="0.25" oninput="render()">
+            <div class="hint">3.00 (Ex.4 Crystal Gold) · 5.00 (Ex.1 Woodbury) ⚠️</div>
+          </div>
+          <div class="hint">κ=1.4 path factor applied automatically</div>
+        </div>
+
+        <!-- Pricing -->
+        <div class="sec" style="margin-top:6px">Pricing</div>
+        <div class="field">
+          <label>Client type</label>
+          <select id="client" onchange="render()">
+            <!-- populated from CLIENT_TYPES in tables.js -->
+          </select>
+        </div>
+        <div class="field">
+          <label>Quantity</label>
+          <input type="number" id="QTY" value="4" min="1" step="1" oninput="render()">
+        </div>
+
+      </div><!-- /.card -->
+    </div><!-- /left panel -->
+
+    <!-- ── Right panel: steps ── -->
+    <div class="steps-col" id="steps-col">
+      <!-- Populated by calculator.js -->
+    </div>
+
+  </div><!-- /.cols -->
+
+  <!-- Totals -->
+  <div class="totals">
+    <div class="tot">
+      <div class="lbl">Cost brut</div>
+      <div class="val" id="t-brut">—</div>
+      <div class="sub">before machining</div>
+    </div>
+    <div class="tot">
+      <div class="lbl">Machining</div>
+      <div class="val" id="t-mach">—</div>
+      <div class="sub">angle + brûlage</div>
+    </div>
+    <div class="tot">
+      <div class="lbl">Unit price</div>
+      <div class="val" id="t-unit">—</div>
+      <div class="sub">after ÷γ</div>
+    </div>
+    <div class="tot">
+      <div class="lbl">Total order</div>
+      <div class="val" id="t-total">—</div>
+      <div class="sub" id="t-qty">—</div>
+    </div>
+  </div>
+
+</div><!-- /#app -->
+
+<!-- Load order: tables first (data), then calculator (logic + render) -->
+<script src="tables.js"></script>
+<script src="calculator.js"></script>
+<script>
+  // Populate dropdowns from tables.js at startup
+  (function() {
+    const finiSel   = document.getElementById('fini');
+    const clientSel = document.getElementById('client');
+
+    FINISH_OPTIONS.forEach(([label, code]) => {
+      const o = document.createElement('option');
+      o.value = code; o.textContent = label;
+      finiSel.appendChild(o);
+    });
+    CLIENT_TYPES.forEach(([label, gamma]) => {
+      const o = document.createElement('option');
+      o.value = gamma; o.textContent = label;
+      clientSel.appendChild(o);
+    });
+  })();
+</script>
+</body>
+</html>
