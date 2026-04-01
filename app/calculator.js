@@ -185,20 +185,30 @@ function diagPS(r) {
 }
 
 function diagF(r) {
-  const { F } = r;
-  const fin = [['Meulé',3.00],['Jet de sable',3.50],['Brûlé',3.50],['Poli mat',4.50],['Poli glacé',5.00],['Bouchardé gros',5.50],['Éclaté',18.00]];
-  const maxV = 18, barW = 120;
-  let bars = '', by = 28;
-  fin.forEach(([nm, v]) => {
-    const w = v / maxV * barW, cur = Math.abs(v - F) < 0.01;
-    const col = cur ? C_DIM : '#ddd';
-    const fc  = cur ? C_DIM : C_MUTED;
-    bars += `<rect x="92" y="${by-10}" width="${w}" height="13" fill="${col}" opacity="${cur ? .8 : .5}" rx="2"/>`;
-    bars += tx(88, by, nm, 'end', fc);
-    bars += tx(92 + w + 4, by, `$${v.toFixed(2)}`, 'start', fc);
-    by += 17;
-  });
-  return svgWrap(bars, by + 6);
+  const { famille, fini } = r;
+  const tbl = F_TBL[famille] || {};
+  const labelFor = key => {
+    const opt = FINISH_OPTIONS.find(([, k]) => k === key);
+    return opt ? opt[0].replace(/\s*\(\d+(\.\d+)?\)$/, '') : key;
+  };
+  let rows = '', ry = 30;
+  for (const [key, v] of Object.entries(tbl)) {
+    const matched = key === fini;
+    const na = v === 0;
+    const bg = matched ? '#ddeeff' : 'none';
+    const fc = matched ? C_DIM : (na ? '#bbb' : C_MUTED);
+    rows += `<rect x="20" y="${ry-11}" width="220" height="15" fill="${bg}" rx="2"/>`;
+    rows += tx(24, ry, labelFor(key), 'start', fc);
+    rows += tx(238, ry, na ? '—' : `$${v.toFixed(2)}`, 'end', fc);
+    ry += 17;
+  }
+  return svgWrap(
+    tx(130, 14, `F table (${famille})`)
+    + tx(24, 26, 'Finish', 'start', C_MUTED, 8.5)
+    + tx(238, 26, '$/pi²', 'end', C_MUTED, 8.5)
+    + `<line x1="20" y1="28" x2="240" y2="28" stroke="#ddd" stroke-width=".5"/>`
+    + rows
+  , ry + 8);
 }
 
 function diagBase(r) {
