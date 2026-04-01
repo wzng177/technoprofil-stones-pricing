@@ -283,12 +283,12 @@ function diagAngle(r) {
     + `<line x1="${ax+chX}" y1="${ay}" x2="${ax}" y2="${ay+chY}" stroke="${C_WARN}" stroke-width="1.5"/>`
     + `<line x1="${ax-12}" y1="${ay}" x2="${ax-12}" y2="${ay+ah}" stroke="${C_DIM}" stroke-width=".75" marker-start="url(#arr)" marker-end="url(#arr)"/>`
     + tx(ax - 16, ay + ah / 2, 'A_b', 'middle', C_DIM, 8.5, rotStr)
-    + tx(130, ay + 25, `path = A_b / sin45° = ${nd(S_angle, 2)} pi.lin`, 'middle', C_WARN, 9)
-    + tx(130, ay + 39, `P_angle = F(${nd(F,2)}) × m(${nd(m_used,3)}) = ${nd(P_angle,2)}/pi.lin`, 'middle', C_MUTED, 9)
-    + tx(130, ay + 53, `÷ (β₁×β₂=0.855) → ${$d(Cost_angle)}`, 'middle', C_OK, 9)
-    + `<line x1="20" y1="${ay+62}" x2="240" y2="${ay+62}" stroke="#ddd" stroke-width=".4"/>`
-    + tx(20, ay + 75, `m_ext for B=${nd(B, 2)}"`, 'start', C_MUTED, 8.5)
-    + tx(20, ay + 87, `table: ×${nd(mExt(B),1)}   observed: ×1.25² = ×${nd(1.5625,3)}`, 'start', C_MUTED, 8.5)
+    + tx(150, ay +  100 + 25, `path = A_b / sin45° = ${nd(S_angle, 2)} pi.lin`, 'middle', C_WARN, 9)
+    + tx(130, ay + 100 + 39, `P_angle = F(${nd(F,2)}) × m(${nd(m_used,3)}) = ${nd(P_angle,2)}/pi.lin`, 'middle', C_MUTED, 9)
+    + tx(130, ay + 100 + 53, `path × P_angle ÷ (β₁×β₂=0.855) → ${$d(Cost_angle)}`, 'middle', C_OK, 9)
+    // + `<line x1="20" y1="${ 100 + ay+62}" x2="240" y2="${ 100 + ay+62}" stroke="#ddd" stroke-width=".4"/>`
+    + tx(20, ay +  100 + 75, `m_ext for B=${nd(B, 2)}"`, 'start', C_MUTED, 8.5)
+    + tx(20, ay +  100 +  87, `table: ×${nd(mExt(B),1)}   observed: ×1.25² = ×${nd(1.5625,3)}`, 'start', C_MUTED, 8.5)
   , ay + ah + 72);
 }
 
@@ -482,8 +482,14 @@ function render() {
 
   // Render
   const col = document.getElementById('steps-col');
+  const prevOpen = new Set();
+  const hasPrev = col.children.length > 0;
+  col.querySelectorAll('.step-card').forEach((el, i) => {
+    if (el.classList.contains('open')) prevOpen.add(i);
+  });
   col.innerHTML = '';
-  steps.forEach(s => {
+  steps.forEach((s, i) => {
+    if (hasPrev) s.el.classList.toggle('open', prevOpen.has(i));
     col.appendChild(s.el);
     try {
       const el = document.getElementById(s.diagId);
