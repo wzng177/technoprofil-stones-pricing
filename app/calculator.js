@@ -554,6 +554,15 @@ function applyPreset(key, chipEl) {
   render();
 }
 
+// ── Dev / Prod toggle ─────────────────────────────────────────
+
+function setDevMode(btn) {
+  const dev = !btn.classList.contains('dev');
+  btn.classList.toggle('dev', dev);
+  btn.textContent = dev ? 'DEV' : 'PROD';
+  document.getElementById('dev-only').style.display = dev ? 'block' : 'none';
+}
+
 // ── PDF upload ────────────────────────────────────────────────
 
 function pdfDragOver(e) {

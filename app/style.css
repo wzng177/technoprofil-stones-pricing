@@ -90,11 +90,32 @@ select {
 /* ── Header ─────────────────────────────────────────────────── */
 .app-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 12px;
   margin-bottom: 20px;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--rule);
+}
+.env-toggle {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--rule);
+  background: #fff;
+  color: var(--ink-ghost);
+  cursor: pointer;
+  transition: all .15s;
+}
+.env-toggle:hover { border-color: var(--ink-light); color: var(--ink); }
+.env-toggle.dev {
+  background: var(--amber-soft);
+  border-color: var(--amber);
+  color: var(--amber);
 }
 .app-title {
   font-family: var(--mono);
