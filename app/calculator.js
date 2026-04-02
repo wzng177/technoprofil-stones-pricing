@@ -163,7 +163,7 @@ function diagGS(r) {
 function diagPS(r) {
   const { famille, B, PS } = r;
   const tbl = PS_TBL[famille];
-  let rows = '', ry = 30;
+  let rows = '', ry = 42;
   const show = Math.min(tbl.length, 9);
   for (let i = 0; i < show; i++) {
     const lo = i === 0 ? 1 : tbl[i-1][0];
@@ -191,7 +191,7 @@ function diagF(r) {
     const opt = FINISH_OPTIONS.find(([, k]) => k === key);
     return opt ? opt[0].replace(/\s*\(\d+(\.\d+)?\)$/, '') : key;
   };
-  let rows = '', ry = 30;
+  let rows = '', ry = 42;
   for (const [key, v] of Object.entries(tbl)) {
     const matched = key === fini;
     const na = v === 0;
