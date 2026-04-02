@@ -101,7 +101,7 @@ const FINISH_OPTIONS = [
 const PRESETS = {
   ex3: {
     label: 'Ex.3 — Crystal Gold sill',
-    B: 2, A: 18.875, C: 27.5625, P: 53,
+    B: 2, A: 18.875, C: 27.5625, P: 53.50,
     famille: 'granit', fini: 'brule_cg',
     client: 0.85, QTY: 4,
     shape: 'chamfer', hasAngle: true, hasBrulage: false,

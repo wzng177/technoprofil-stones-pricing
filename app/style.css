@@ -282,6 +282,38 @@ select {
 .mext-opt:hover { background: var(--stone-deep); }
 .mext-opt.on { background: var(--amber-soft); color: var(--amber); font-weight: 500; }
 
+/* ── PDF upload zone ─────────────────────────────────────────── */
+.pdf-zone {
+  border: 1.5px dashed var(--rule);
+  border-radius: var(--radius-md);
+  padding: 10px 8px 9px;
+  text-align: center;
+  cursor: pointer;
+  background: var(--stone-mid);
+  color: var(--ink-light);
+  transition: border-color .15s, background .15s;
+  margin-bottom: 6px;
+}
+.pdf-zone:hover { border-color: var(--ink-light); background: var(--stone-deep); }
+.pdf-zone.dragover { border-color: var(--blue); background: var(--blue-soft); }
+.pdf-prompt { font-family: var(--mono); font-size: 11px; }
+.pdf-browse { color: var(--blue); text-decoration: underline; }
+.pdf-status {
+  font-family: var(--mono);
+  font-size: 10px;
+  min-height: 14px;
+  margin-bottom: 4px;
+  color: var(--ink-ghost);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pdf-status.loading { color: var(--ink-light); }
+.pdf-status.ok      { color: var(--green); }
+.pdf-status.warn    { color: var(--amber); }
+.pdf-status.err     { color: var(--accent); }
+.pdf-rule { height: 1px; background: var(--rule-light); margin: 4px 0 12px; }
+
 /* ── Steps column ────────────────────────────────────────────── */
 .steps-col { display: flex; flex-direction: column; gap: 8px; }
 

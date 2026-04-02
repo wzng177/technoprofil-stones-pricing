@@ -554,5 +554,122 @@ function applyPreset(key, chipEl) {
   render();
 }
 
+// ── PDF upload ────────────────────────────────────────────────
+
+function pdfDragOver(e) {
+  e.preventDefault();
+  document.getElementById('pdf-zone').classList.add('dragover');
+}
+
+function pdfDragLeave() {
+  document.getElementById('pdf-zone').classList.remove('dragover');
+}
+
+function pdfDrop(e) {
+  e.preventDefault();
+  document.getElementById('pdf-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file && file.type === 'application/pdf') uploadPDF(file);
+  else setPdfStatus('err', 'Not a PDF file');
+}
+
+function pdfFileSelected(input) {
+  const file = input.files[0];
+  if (file) uploadPDF(file);
+  input.value = '';  // reset so the same file can be re-uploaded
+}
+
+function setPdfStatus(state, msg) {
+  const el = document.getElementById('pdf-status');
+  el.textContent = msg;
+  el.className = 'pdf-status ' + state;
+}
+
+async function uploadPDF(file) {
+  setPdfStatus('loading', 'Extracting…');
+
+  const fd = new FormData();
+  fd.append('file', file);
+
+  let data = {};
+  try {
+    const res = await fetch(CONFIG.extractApiUrl, { method: 'POST', body: fd });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    data = await res.json();
+  } catch (e) {
+    setPdfStatus('err', `Server unreachable — values unchanged (${e.message})`);
+    return;  // leave every form field as-is
+  }
+
+  // Response wraps piece data inside pieces[]. Take the first piece.
+  const pieces = Array.isArray(data.pieces) ? data.pieces : [];
+  const p = pieces[0] || {};
+
+  let anyMissing = false;
+
+  // Apply a numeric form field from a source object.
+  // Tries each key alias in order; leaves the field unchanged if none match.
+  // missing=true means the caller considers this field required (counts toward partial status).
+  function setNum(src, id, required, ...keys) {
+    for (const k of keys) {
+      const v = src[k];
+      if (v !== undefined && v !== null && !isNaN(Number(v))) {
+        document.getElementById(id).value = Number(v);
+        return;
+      }
+    }
+    if (required) anyMissing = true;
+  }
+
+  // Apply a <select> field; value must exactly match an existing <option>.
+  function setOpt(src, id, required, ...keys) {
+    for (const k of keys) {
+      const v = src[k];
+      if (v != null && document.querySelector(`#${id} option[value="${v}"]`)) {
+        document.getElementById(id).value = v;
+        return;
+      }
+    }
+    if (required) anyMissing = true;
+  }
+
+  // Fields the server does return — read from pieces[0]
+  setNum(p, 'B',   true,  'thickness_in', 'B', 'thickness');
+  setNum(p, 'A',   true,  'depth_in',     'A', 'depth');
+  setNum(p, 'C',   true,  'length_in',    'C', 'length');
+  setNum(p, 'QTY', true,  'qty', 'QTY', 'quantity');
+  setOpt(p, 'famille', true, 'stone_family', 'famille', 'family');
+
+  // Finish: server now returns the exact frontend option key directly.
+  const rawFinish = p.finish ?? p.fini;
+  if (rawFinish && document.querySelector(`#fini option[value="${rawFinish}"]`)) {
+    document.getElementById('fini').value = rawFinish;
+  } else {
+    anyMissing = true;
+  }
+
+  // Fields the server does NOT currently return — apply if present, never count as missing
+  setNum(data, 'P', false, 'P', 'price_per_pi3', 'price');
+  setOpt(data, 'client', false, 'gamma', 'client');
+
+  if (data.hasAngle !== undefined) {
+    document.getElementById('hasAngle').checked = Boolean(data.hasAngle);
+  }
+  if (data.hasBrulage !== undefined) {
+    const val = Boolean(data.hasBrulage);
+    document.getElementById('hasBrulage').checked = val;
+    document.getElementById('brulage-fields').style.display = val ? 'block' : 'none';
+  }
+
+  const pieceNote = pieces.length > 1 ? ` (${pieces.length} pieces found — showing first)` : '';
+  setPdfStatus(
+    anyMissing ? 'warn' : 'ok',
+    anyMissing
+      ? `Partial extraction${pieceNote} — some fields kept as-is`
+      : `Extracted from ${file.name}${pieceNote}`
+  );
+  render();
+}
+
 // ── Init ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', render);
