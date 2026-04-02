@@ -1,8 +1,10 @@
-streamlit
-pdfplumber
-python-dotenv
-
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9
+pdfplumber>=0.11.0
+python-dotenv>=1.0.0
+ 
 # LLM providers — install only what you use
-openai                    # LLM_PROVIDER=openai
-google-generativeai       # LLM_PROVIDER=gemini
-anthropic                 # LLM_PROVIDER=anthropic
+openai                  # LLM_PROVIDER=openai
+google-generativeai     # LLM_PROVIDER=gemini
+anthropic               # LLM_PROVIDER=anthropic
