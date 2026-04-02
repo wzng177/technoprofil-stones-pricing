@@ -37,7 +37,7 @@ class Piece(BaseModel):
     thickness_in: Optional[float]   # B  (HAUT / THICK)
     length_in: Optional[float]      # C  (LONG / LENGTH)
     material: Optional[str]
-    finish: Optional[str]           # brule | poli_glace | poli_mat | jet_sable | thermal
+    finish: Optional[str]           # brule_cg | brule | jet_sable | meule | poli_glace | poli_mat | bouchard_gros | eclate
     stone_family: Optional[str]     # granit | calcaire | marbre
 
 
@@ -79,9 +79,17 @@ Format attendu :
 Règles de conversion:
 - Si les dimensions sont en mm, convertis en pouces (divise par 25.4).
 - Les fractions dans le texte comme "23 1/4" = 23.25, "95 3/16" = 95.1875.
-- Normalise le fini en: brule | thermal | poli_glace | poli_mat | jet_sable | meule | bouchard | eclate
-  (THERMAL → brule, BRULÉ → brule, POLISHED → poli_glace, SAND BLAST → jet_sable, etc.)
-- Normalise la famille de pierre: granit | calcaire | marbre
+- Normalise le fini en utilisant EXACTEMENT l'une de ces clés: brule_cg | brule | jet_sable | meule | poli_glace | poli_mat | bouchard_gros | eclate
+  Règles de mapping (le matériau doit être pris en compte pour brule_cg vs brule):
+    BRÛLÉ / BRULE / THERMAL sur CRYSTAL GOLD            → brule_cg
+    BRÛLÉ / BRULE / THERMAL sur tout autre matériau     → brule
+    POLISHED GLOSS / POLI GLACÉ                         → poli_glace
+    POLISHED MATTE / POLI MAT                           → poli_mat
+    SAND BLAST / JET DE SABLE                           → jet_sable
+    MEULÉ / GROUNDED / SAWN                             → meule
+    BOUCHARDÉ / BUSHHAMMERED                            → bouchard_gros
+    ÉCLATÉ / SPLIT FACE                                 → eclate
+- Normalise la famille de pierre en utilisant EXACTEMENT l'une de ces clés: granit | calcaire | marbre
   (GRANITE → granit, LIMESTONE → calcaire, MARBLE → marbre, WOODBURY → granit, CRYSTAL GOLD → granit)
 - Si une valeur est absente, utilise null.
 
@@ -213,6 +221,7 @@ async def extract(file: UploadFile = File(..., description="Client order PDF")):
         raise HTTPException(status_code=502, detail=f"LLM call failed: {exc}") from exc
 
     pieces = [Piece(**p) for p in data.get("pieces", [])]
+    print("PIECES:", pieces)
 
     return ExtractResponse(
         project=data.get("project"),
