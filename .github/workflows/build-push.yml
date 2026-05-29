@@ -28,7 +28,7 @@ jobs:
           context: .
           file: Dockerfile.backend
           push: true
-          tags: ${{ secrets.ACR_LOGIN_SERVER }}/stones-backend:latest
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/technoprofil-bakend:latest
 
       - name: Build and push frontend
         uses: docker/build-push-action@v5
@@ -36,6 +36,6 @@ jobs:
           context: .
           file: Dockerfile.frontend
           push: true
-          tags: ${{ secrets.ACR_LOGIN_SERVER }}/stones-frontend:latest
+          tags: ${{ secrets.ACR_LOGIN_SERVER }}/technoprofil-frontend:latest
           build-args: |
             API_URL=${{ secrets.BACKEND_URL }}
