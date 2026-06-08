@@ -123,7 +123,8 @@ select {
   cursor: pointer;
   transition: all .15s;
 }
-.auth-btn:hover { background: var(--ink-mid); border-color: var(--ink-mid); }
+.auth-btn:hover:not(:disabled) { background: var(--ink-mid); border-color: var(--ink-mid); }
+.auth-btn:disabled { opacity: .5; cursor: default; }
 
 /* ── Header auth indicators ──────────────────────────────────── */
 .auth-user {

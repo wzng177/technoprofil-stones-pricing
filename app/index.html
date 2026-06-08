@@ -239,24 +239,35 @@
   // Microsoft account. Access itself is enforced by Entra ID (assigned users
   // only); this just drives the sign-in flow and reveals the app on success.
   (async function bootstrapAuth() {
-    const gate = document.getElementById('auth-gate');
-    const msg  = document.getElementById('auth-msg');
-    const app  = document.getElementById('app');
+    const gate    = document.getElementById('auth-gate');
+    const msg     = document.getElementById('auth-msg');
+    const app     = document.getElementById('app');
+    const loginBtn = document.getElementById('auth-login-btn');
+
+    // Disabled until MSAL is confirmed ready — avoids clicking into a null instance.
+    loginBtn.disabled = true;
+    gate.style.display = 'flex';
 
     if (!AUTH_IS_CONFIGURED) {
       msg.textContent = "Authentification non configurée — contactez l'administrateur.";
-      document.getElementById('auth-login-btn').style.display = 'none';
-      gate.style.display = 'flex';
+      loginBtn.style.display = 'none';
       return;
     }
 
     try {
       await authInit();
     } catch (e) {
+      console.error('Azure AD auth init failed:', e);
       msg.textContent = `Erreur d'authentification : ${e.message}`;
-      gate.style.display = 'flex';
       return;
     }
+
+    if (!msalInstance) {
+      msg.textContent = "Erreur d'authentification : impossible d'initialiser MSAL (vérifiez clientId/tenantId).";
+      return;
+    }
+
+    loginBtn.disabled = false;
 
     if (authIsSignedIn()) {
       gate.style.display = 'none';

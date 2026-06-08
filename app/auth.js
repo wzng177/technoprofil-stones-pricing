@@ -17,6 +17,10 @@ let currentAccount = null;
 async function authInit() {
   if (!AUTH_IS_CONFIGURED) return false;
 
+  if (typeof msal === 'undefined') {
+    throw new Error('MSAL SDK failed to load from CDN');
+  }
+
   msalInstance = new msal.PublicClientApplication({
     auth: {
       clientId:    AUTH_CONFIG.clientId,
@@ -49,10 +53,12 @@ function authUserLabel() {
 }
 
 function authSignIn() {
+  if (!msalInstance) throw new Error('MSAL is not initialized — cannot sign in');
   return msalInstance.loginRedirect({ scopes: AUTH_SCOPES });
 }
 
 function authSignOut() {
+  if (!msalInstance) throw new Error('MSAL is not initialized — cannot sign out');
   return msalInstance.logoutRedirect({ account: currentAccount });
 }
 
