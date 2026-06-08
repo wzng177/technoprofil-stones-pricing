@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(gh auth *)"
+      "Bash(gh auth *)",
+      "Bash(curl -s \"https://api.github.com/repos/wzng177/technoprofil-stones-pricing/actions/runs?per_page=5\")",
+      "Bash(curl -s \"https://data.jsdelivr.com/v1/packages/npm/@azure/msal-browser/resolved?specifier=3\")"
     ]
   }
 }
