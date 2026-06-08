@@ -22,10 +22,11 @@ import base64
 
 import fitz  # PyMuPDF
 import pdfplumber
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
+from server.auth import get_current_user
 from server.llm import complete, complete_with_images  # your existing multi-provider client
 
 # ── Pydantic models ───────────────────────────────────────────────────────────
@@ -172,7 +173,10 @@ app.add_middleware(
 
 
 @app.post("/extract", response_model=ExtractResponse, summary="Extract order data from PDF")
-async def extract(file: UploadFile = File(..., description="Client order PDF")):
+async def extract(
+    file: UploadFile = File(..., description="Client order PDF"),
+    user: dict = Depends(get_current_user),
+):
     """
     Upload a PDF → returns project info + list of pieces with their
     A/B/C dimensions, material, finish, and stone family.

@@ -39,3 +39,5 @@ jobs:
           tags: ${{ secrets.ACR_LOGIN_SERVER }}/technoprofil-frontend:latest
           build-args: |
             API_URL=${{ secrets.BACKEND_URL }}
+            AZURE_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}
+            AZURE_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}

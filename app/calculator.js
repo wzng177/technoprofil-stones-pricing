@@ -602,7 +602,11 @@ async function uploadPDF(file) {
 
   let data = {};
   try {
-    const res = await fetch(CONFIG.extractApiUrl, { method: 'POST', body: fd });
+    const headers = {};
+    if (AUTH_IS_CONFIGURED) {
+      headers['Authorization'] = `Bearer ${await authGetToken()}`;
+    }
+    const res = await fetch(CONFIG.extractApiUrl, { method: 'POST', headers, body: fd });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     data = await res.json();
   } catch (e) {

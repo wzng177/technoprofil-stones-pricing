@@ -5,14 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Technoprofil — Estimateur</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://alcdn.msauth.net/browser/3.18.0/js/msal-browser.min.js"></script>
 </head>
 <body>
-<div id="app">
+
+<!-- Auth gate — shown until the user is signed in with an authorized Microsoft account -->
+<div id="auth-gate" class="auth-gate" style="display:none">
+  <div class="auth-card">
+    <span class="app-title">Technoprofil</span>
+    <p class="auth-msg" id="auth-msg">Cet outil est réservé aux utilisateurs autorisés.</p>
+    <button id="auth-login-btn" class="auth-btn" onclick="authSignIn()">Se connecter avec Microsoft →</button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
 
   <!-- Header -->
   <header class="app-header">
     <span class="app-title">Technoprofil</span>
     <span class="app-subtitle">Estimateur de coût — pierre naturelle</span>
+    <span id="auth-user" class="auth-user"></span>
+    <button id="auth-logout-btn" class="auth-logout" onclick="authSignOut()">Déconnexion</button>
     <button id="env-toggle" class="env-toggle" onclick="setDevMode(this)">PROD</button>
   </header>
 
@@ -198,8 +211,10 @@
 
 </div><!-- /#app -->
 
-<!-- Load order: config (env), tables (data), calculator (logic + render) -->
+<!-- Load order: config (env), auth, tables (data), calculator (logic + render) -->
 <script src="config.js"></script>
+<script src="authConfig.js"></script>
+<script src="auth.js"></script>
 <script src="tables.js"></script>
 <script src="calculator.js"></script>
 <script>
@@ -218,6 +233,38 @@
       o.value = gamma; o.textContent = label;
       clientSel.appendChild(o);
     });
+  })();
+
+  // Auth gate — block the app until the user signs in with an authorized
+  // Microsoft account. Access itself is enforced by Entra ID (assigned users
+  // only); this just drives the sign-in flow and reveals the app on success.
+  (async function bootstrapAuth() {
+    const gate = document.getElementById('auth-gate');
+    const msg  = document.getElementById('auth-msg');
+    const app  = document.getElementById('app');
+
+    if (!AUTH_IS_CONFIGURED) {
+      msg.textContent = "Authentification non configurée — contactez l'administrateur.";
+      document.getElementById('auth-login-btn').style.display = 'none';
+      gate.style.display = 'flex';
+      return;
+    }
+
+    try {
+      await authInit();
+    } catch (e) {
+      msg.textContent = `Erreur d'authentification : ${e.message}`;
+      gate.style.display = 'flex';
+      return;
+    }
+
+    if (authIsSignedIn()) {
+      gate.style.display = 'none';
+      app.style.display = '';
+      document.getElementById('auth-user').textContent = authUserLabel();
+    } else {
+      gate.style.display = 'flex';
+    }
   })();
 </script>
 </body>
